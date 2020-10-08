@@ -1,0 +1,163 @@
+:import {
+    -st-from: './header.st.css';
+    -st-default: Header;
+}
+
+:import {
+    -st-from: "./file-explorer/file-explorer.st.css";
+    -st-default: FileExplorer;
+}
+
+/* * {
+    outline: 1px solid red;
+} */
+
+:vars {
+    bgMain: rgb(42, 42, 42);
+    bgSecondary: rgb(201, 207, 207);
+    bgContrast: rgba(255, 255, 255, 0.9);
+    bgHover: rgb(150, 255, 146);
+    textMain: rgb(34, 34, 34);
+    textActive: rgb(255, 217, 0);
+    roundedCorner: 12px;
+    largeGap: 1.5em;
+    mediumGap: 0.75em;
+    smallGap: 0.25em;
+    shadow: 10px 10px 10px 0px rgba(0, 0, 0, 0.9);
+    smallText: 1.25em;
+    mediumText: 1.5em;
+    largeText: 2em;
+}
+
+.root {
+    height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 3fr 3fr;
+    grid-template-rows: auto 5fr 5fr;
+    gap: value(largeGap) value(largeGap);
+    grid-template-areas:
+        "header header header"
+        "fileExplorer source target"
+        "fileExplorer ast diagnostics";
+    background-color: value(bgSecondary);
+}
+
+.header {
+    -st-extends: Header;
+    grid-area: header;
+    background-color: value(bgMain);
+}
+
+.header::title {
+    display: flex;
+    align-items: center;
+    display: flex;
+    font-family: monospace;
+    font-size: value(largeText);
+    color: value(bgContrast);
+}
+
+.header::icon {
+    margin: value(smallGap) value(mediumGap);
+}
+
+.fileExplorer {
+    -st-extends: FileExplorer;
+    background-color: value(bgMain);
+    padding: value(mediumGap);
+    border-radius: value(roundedCorner);
+    margin-inline-start: value(mediumGap);
+    margin-block-end: value(largeGap);
+    box-shadow: 10px 10px 5px 0px rgba(0, 0, 0, 0.9);
+}
+
+.fileExplorer::fileEntries {}
+
+.fileExplorer::fileEntry {
+    display: flex;
+    font-size: value(smallText);
+    font-family: monospace;
+    background-color: value(bgContrast);
+    margin: value(smallGap) 0;
+}
+
+.fileExplorer::label {
+    flex: 1;
+    border: 0;
+    font-size: inherit;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0);
+}
+
+.fileExplorer::remove {
+    border: 0;
+    font-size: inherit;
+    cursor: pointer;
+    background-color: rgba(255, 255, 255, 0);
+}
+
+.fileExplorer::fileEntry:hover {
+    background-color: value(bgHover);
+}
+
+.fileExplorer::fileEntry:selected {
+    background-color: value(textActive);
+}
+
+.fileExplorer::newFileEntry {
+    display: flex;
+    font-size: value(smallText);
+    margin-block-start: value(largeGap);
+}
+
+.fileExplorer::newFileInput {
+    font-size: inherit;
+    flex: 1;
+}
+
+.fileExplorer::addNewFile {
+    font-size: inherit;
+    border: 0;
+    cursor: pointer;
+    background-color: value(textActive);
+}
+
+.card {
+    border-radius: value(roundedCorner);
+    box-shadow: value(shadow);
+    background: #ffffff;
+}
+
+.cardTitle {
+    margin: value(mediumGap);
+    font-family: monospace;
+    font-size: value(mediumText);
+}
+
+.source {
+    -st-mixin: card;
+    grid-area: source;
+    overflow: hidden;
+}
+
+.target {
+    -st-mixin: card;
+    grid-area: target;
+    overflow: hidden;
+    margin-inline-end: value(largeGap);
+}
+
+.ast {
+    -st-mixin: card;
+    grid-area: ast;
+    overflow: hidden;
+    margin-block-end: value(largeGap);
+}
+
+.diagnostics {
+    -st-mixin: card;
+    grid-area: diagnostics;
+    font-family: monospace;
+    margin-inline-end: value(largeGap);
+    margin-block-end: value(largeGap);
+}
