@@ -2,7 +2,7 @@ import type { IDirectoryContents } from '@file-services/types';
 import { createCjsModuleSystem } from '@file-services/commonjs';
 import { createMemoryFs } from '@file-services/memory';
 import { noCollisionNamespace, Stylable } from '@stylable/core';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { st, classes } from './app.st.css';
 import { Header } from './header';
@@ -11,25 +11,41 @@ import Editor, { ControlledEditor } from '@monaco-editor/react';
 import { FileExplorer } from './file-explorer/file-explorer';
 
 const file1 = '/index.st.css';
-const file2 = '/base.st.css';
-const file3 = '/other.st.css';
+const file2 = '/button.st.css';
+const file3 = '/project.st.css';
 const data: IDirectoryContents = {
     [file1]: `:import {
-    -st-from: './base.st.css';
-    -st-default: Comp;
+        -st-from: './project.st.css';
+        -st-named: active, danger;
+    }
+:import {
+    -st-from: './button.st.css';
+    -st-default: Button;
 }
-.root {
-    -st-extends: Comp;
-    color: value(green); 
+.root {}
+
+.okButton {
+    -st-extends: Button;
+    color: value(active); 
 }
-.root::part {
-    color: gold;
+
+.okButton::label {
+    font-size: 1.5em;
+}
+
+.cancelButton {
+    -st-extends: Button;
+    color: value(danger); 
 }
 `,
     [file2]: `.root {}
-.part {}
+.label {}
+.icon {}
 `,
-    [file3]: ``,
+    [file3]: `:vars {
+    active: green;
+    danger: red;
+}`,
 };
 const fs = createMemoryFs(data);
 const moduleSystem = createCjsModuleSystem({ fs });
@@ -51,7 +67,7 @@ const stylable = new Stylable(
 export interface AppProps {
     className?: string;
 }
-
+let firstLoad = true;
 export const App: React.FC<AppProps> = ({ className }) => {
     function removeFile(filePath: string) {
         const fileList = Object.keys(files);
@@ -82,6 +98,27 @@ export const App: React.FC<AppProps> = ({ className }) => {
 
     const [files, setFiles] = useState<IDirectoryContents>(data);
     const [currentFilePath, setCurrentFilePath] = useState<string>(file1);
+    
+    useEffect(() => {
+        const url = document.location;
+        const searchParams = new URLSearchParams(url.hash);
+        const urlFiles = searchParams.get('files');
+        const localFiles = JSON.stringify(files);
+
+        if (!urlFiles) {
+            searchParams.set('files', localFiles);
+            document.location.hash = searchParams.toString();
+            firstLoad = false;
+        } else {
+            if (firstLoad) {
+                setFiles(JSON.parse(urlFiles));
+                firstLoad = false;
+            } else {
+                searchParams.set('files', localFiles);
+                document.location.hash = searchParams.toString();
+            }
+        }
+    }, [files]);
 
     const meta = stylable.process(currentFilePath);
     stylable.createTransformer().transform(meta);

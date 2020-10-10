@@ -1,6 +1,8 @@
-# Stylable App
+# Stylable Playground
 
-[Stylable](https://github.com/wix/stylable)-powered application. Generated using `create-stylable-app`.
+A code playground for [Stylable](https://github.com/wix/stylable). Generated using `create-stylable-app`.
+
+Play with the [Stylable playground here!](https://wixplosives.github.io/stylable-playground)
 
 ## Development
 
