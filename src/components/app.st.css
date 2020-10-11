@@ -19,12 +19,13 @@
     bgHover: rgb(150, 255, 146);
     textMain: rgb(34, 34, 34);
     textActive: rgb(255, 217, 0);
-    roundedCorner: 12px;
+    roundedCorner: 6px;
     largeGap: 1.5em;
     mediumGap: 0.75em;
     smallGap: 0.25em;
-    shadow: 10px 10px 10px 0px rgba(0, 0, 0, 0.9);
-    smallText: 1.25em;
+    shadow: 10px 10px 10px 0px rgba(0, 0, 0, 0.1);
+    tinyText: 0.85em;
+    smallText: 1em;
     mediumText: 1.5em;
     largeText: 2em;
 }
@@ -32,7 +33,7 @@
 .root {
     height: 100vh;
     display: grid;
-    grid-template-columns: 1fr 3fr 3fr;
+    grid-template-columns: 1fr 4fr 4fr;
     grid-template-rows: auto 5fr 5fr;
     gap: value(largeGap) value(largeGap);
     grid-template-areas:
@@ -64,18 +65,18 @@
 .fileExplorer {
     -st-extends: FileExplorer;
     background-color: value(bgMain);
-    padding: value(mediumGap);
+    padding: 0px value(mediumGap);
     border-radius: value(roundedCorner);
     margin-inline-start: value(mediumGap);
     margin-block-end: value(largeGap);
-    box-shadow: 10px 10px 5px 0px rgba(0, 0, 0, 0.9);
+    box-shadow: value(shadow)
 }
 
 .fileExplorer::fileEntries {}
 
 .fileExplorer::fileEntry {
     display: flex;
-    font-size: value(smallText);
+    font-size: value(tinyText);
     font-family: monospace;
     background-color: value(bgContrast);
     margin: value(smallGap) 0;
@@ -108,11 +109,15 @@
     display: flex;
     font-size: value(smallText);
     margin-block-start: value(largeGap);
+    margin-block-end: value(largeGap);
 }
 
 .fileExplorer::newFileInput {
-    font-size: inherit;
+    font-size: value(tinyText);
     flex: 1;
+    border-radius: 0px;
+    border: none;
+    padding: 0px 6px;
 }
 
 .fileExplorer::addNewFile {
@@ -160,4 +165,23 @@
     font-family: monospace;
     margin-inline-end: value(largeGap);
     margin-block-end: value(largeGap);
+}
+
+@media (max-width: 600px) {
+    .root {
+        display: flex;
+        flex-direction: column;
+        height: auto;
+        gap: 12px;
+    }
+
+    .fileExplorer {
+        margin: 0;
+        border-radius: 0px;
+    }
+
+    .source, .target, .ast, .diagnostics {
+        margin: 12px;
+        height: 400px;
+    }
 }
