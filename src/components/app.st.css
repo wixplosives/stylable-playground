@@ -21,7 +21,7 @@
     textActive: rgb(255, 217, 0);
     roundedCorner: 6px;
     largeGap: 1.5em;
-    mediumGap: 0.75em;
+    mediumGap: 0.85em;
     smallGap: 0.25em;
     shadow: 10px 10px 10px 0px rgba(0, 0, 0, 0.1);
     tinyText: 0.85em;
@@ -35,7 +35,7 @@
     display: grid;
     grid-template-columns: 1fr 4fr 4fr;
     grid-template-rows: auto 5fr 5fr;
-    gap: value(largeGap) value(largeGap);
+    gap: value(mediumGap) value(mediumGap);
     grid-template-areas:
         "header header header"
         "fileExplorer source target"
