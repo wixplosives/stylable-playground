@@ -26,7 +26,7 @@ const data: IDirectoryContents = {
 
 .okButton {
     -st-extends: Button;
-    color: value(active); 
+    color: value(activ); 
 }
 
 .okButton::label {
