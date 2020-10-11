@@ -163,8 +163,8 @@
     -st-mixin: card;
     grid-area: diagnostics;
     font-family: monospace;
-    margin-inline-end: value(largeGap);
-    margin-block-end: value(largeGap);
+    margin-inline-end: 2em;
+    margin-block-end: 2em;
 }
 
 @media (max-width: 600px) {
@@ -181,7 +181,7 @@
     }
 
     .source, .target, .ast, .diagnostics {
-        margin: 12px;
+        margin: 6px;
         height: 400px;
     }
 }
