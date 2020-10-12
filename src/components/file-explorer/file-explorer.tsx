@@ -3,8 +3,8 @@ import { st, classes } from './file-explorer.st.css';
 
 export interface FileExplorerProps {
     filePaths: string[];
-    onSelect: (filePath: string) => void; //MouseEventHandler<HTMLButtonElement>;
-    onRemove: (filePath: string) => void; //MouseEventHandler<HTMLButtonElement>;
+    onSelect: (filePath: string) => void;
+    onRemove: (filePath: string) => void;
     onAddFile: (filePath: string) => void;
     selected: string;
     className?: string;

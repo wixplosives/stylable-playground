@@ -1,13 +1,12 @@
 import { createCjsModuleSystem } from '@file-services/commonjs';
 import { createMemoryFs } from '@file-services/memory';
 import { Diagnostic, noCollisionNamespace, Stylable, StylableMeta } from '@stylable/core';
-import React, { useEffect, useState } from 'react';
-
-import { st, classes } from './app.st.css';
-import { Header } from './header';
-
 import Editor, { ControlledEditor } from '@monaco-editor/react';
+import React, { useCallback, useEffect, useState } from 'react';
+
 import { FileExplorer } from './file-explorer/file-explorer';
+import { Header } from './header';
+import { st, classes } from './app.st.css';
 
 const DEFAULT_EXT = '.st.css';
 
@@ -19,19 +18,12 @@ export interface AppProps {
 export class AppModel {
     fs = createMemoryFs();
     moduleSystem = createCjsModuleSystem({ fs: this.fs });
-    stylable = new Stylable(
-        '/',
-        this.fs,
-        this.moduleSystem.requireModule,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        noCollisionNamespace()
-    );
+    stylable = Stylable.create({
+        projectRoot: '/',
+        fileSystem: this.fs,
+        requireModule: this.moduleSystem.requireModule,
+        resolveNamespace: noCollisionNamespace(),
+    });
     files: Record<string, string> = {};
     selected = '';
     meta?: StylableMeta;
@@ -96,8 +88,7 @@ export class AppModel {
     };
     setSelected = (filePath: string): void => {
         this.selected = filePath;
-        this.meta = this.stylable.process(this.selected);
-        this.stylable.createTransformer().transform(this.meta);
+        this.meta = this.stylable.transform(this.files[this.selected], this.selected).meta;
         this.diagnostics = this.meta.diagnostics.reports.concat(
             this.meta.transformDiagnostics?.reports || []
         );
@@ -108,11 +99,6 @@ export class AppModel {
         this.files[this.selected] = value;
         this.setSelected(this.selected);
     };
-}
-
-function useForceUpdate() {
-    const [value, set] = useState(false);
-    return () => set(!value);
 }
 
 export const App: React.FC<AppProps> = ({ className, model }) => {
@@ -146,6 +132,7 @@ export const App: React.FC<AppProps> = ({ className, model }) => {
                             onChange={(_, value) => updateSelected(value)}
                             language="css"
                             options={{ minimap: { enabled: false }, scrollBeyondLastLine: false }}
+                            editorDidMount={resizeEditor}
                         />
                     </div>
                 </div>
@@ -160,6 +147,7 @@ export const App: React.FC<AppProps> = ({ className, model }) => {
                                 minimap: { enabled: false },
                                 scrollBeyondLastLine: false,
                             }}
+                            editorDidMount={resizeEditor}
                         />
                     </div>
                 </div>
@@ -174,6 +162,7 @@ export const App: React.FC<AppProps> = ({ className, model }) => {
                                 minimap: { enabled: false },
                                 scrollBeyondLastLine: false,
                             }}
+                            editorDidMount={resizeEditor}
                         />
                     </div>
                 </div>
@@ -193,6 +182,20 @@ export const App: React.FC<AppProps> = ({ className, model }) => {
         </main>
     );
 };
+
+function resizeEditor(_: unknown, editor: { getContainerDomNode(): HTMLElement; layout(): void }) {
+    const resize = () => {
+        try {
+            const el = editor.getContainerDomNode().parentElement?.parentElement as HTMLElement;
+            el.style.setProperty('overflow', 'hidden');
+            editor.layout();
+            el.style.setProperty('overflow', null);
+        } catch {
+            window.removeEventListener('resize', resize);
+        }
+    };
+    window.addEventListener('resize', resize);
+}
 
 function createSampleData() {
     const file1 = '/index.st.css';
@@ -243,4 +246,10 @@ function getFilePathFromUserInput(fileName: string, ext: string) {
     } else {
         return `/${fileName}`;
     }
+}
+
+function useForceUpdate(): () => void {
+    const [, dispatch] = useState(Object.create(null));
+    const memoizedDispatch = useCallback((): void => dispatch(Object.create(null)), [dispatch]);
+    return memoizedDispatch;
 }
