@@ -39,12 +39,13 @@ html, body {
     display: grid;
     grid-template-columns: auto 1fr; 
     grid-template-rows: auto 1fr; 
-    /* gap: value(mediumGap) value(mediumGap); */
     grid-template-areas:
         "header header"
         "fileExplorer editors"
         "fileExplorer editors";
     background-color: value(bgSecondary);
+    font-family: monospace;
+
 }
 
 
@@ -70,8 +71,6 @@ html, body {
 .header::title {
     display: flex;
     align-items: center;
-    display: flex;
-    font-family: monospace;
     font-size: value(largeText);
     color: value(bgContrast);
 }
@@ -85,33 +84,40 @@ html, body {
     background-color: rgb(45,45,45); 
     padding: 0px value(smallGap);
     border-radius: value(roundedCorner);
-    box-shadow: value(shadow)
+    font-size: value(smallText);
+    min-width: 35ch;
+}
+
+.fileExplorer::title{
+    font-size: value(mediumText);
+    padding: 0.5em 0;
+    margin: 0;
+    color: #ffffff
 }
 
 .fileExplorer::fileEntries {}
 
 .fileExplorer::fileEntry {
     display: flex;
-    font-size: value(tinyText);
-    font-family: monospace;
     background-color: value(bgContrast);
     margin: value(smallGap) 0;
 }
 
 .fileExplorer::label {
-    padding: 1em; 
+    text-align: start;
+    padding: 1em 0.5em; 
     flex: 1;
     border: 0;
-    font-size: inherit;
     cursor: pointer;
     background: rgba(255, 255, 255, 0);
 }
 
 .fileExplorer::remove {
     border: 0;
-    font-size: inherit;
     cursor: pointer;
     background-color: rgba(255, 255, 255, 0);
+    width: 2em;
+    padding: 0;
 }
 
 .fileExplorer::fileEntry:hover {
@@ -124,25 +130,25 @@ html, body {
 
 .fileExplorer::newFileEntry {
     display: flex;
-    font-size: value(smallText);
 }
 
 .fileExplorer::newFileInput {
-     padding: 1em; 
-    font-size: value(tinyText);
+    padding: 1em 0.5em; 
+    font-size: inherit;
     flex: 1;
     border: none;
 }
 
 .fileExplorer::addNewFile {
-    font-size: inherit;
     border: 0;
     cursor: pointer;
     background-color: value(textActive);
+    width: 2em;
+    padding: 0;
 }
 
 .card {
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.2);
     position: relative;
     box-shadow: value(shadow);
     background: #ffffff;
@@ -154,7 +160,6 @@ html, body {
     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     margin: 0;
     padding: 0.5em;
-    font-family: monospace;
     font-size: value(mediumText);
     background: linear-gradient(rgba(0,0,0,0.03),rgba(0,0,0,0.0));
 }
@@ -180,7 +185,6 @@ html, body {
 .diagnostics {
     -st-extends: card;
     grid-area: diagnostics;
-    font-family: monospace;
 }
 
 /* @media (max-width: 600px) {

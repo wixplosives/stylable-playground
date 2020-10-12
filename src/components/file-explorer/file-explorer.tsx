@@ -1,13 +1,21 @@
-import React, { MouseEventHandler, useState } from 'react';
+import React, { useRef } from 'react';
 import { st, classes } from './file-explorer.st.css';
 
 export interface FileExplorerProps {
     filePaths: string[];
-    onSelect: MouseEventHandler<HTMLButtonElement>;
-    onRemove: MouseEventHandler<HTMLButtonElement>;
+    onSelect: (filePath: string) => void; //MouseEventHandler<HTMLButtonElement>;
+    onRemove: (filePath: string) => void; //MouseEventHandler<HTMLButtonElement>;
     onAddFile: (filePath: string) => void;
     selected: string;
     className?: string;
+}
+
+function bindKey(key: string, action: () => void) {
+    return (evt: React.KeyboardEvent<HTMLInputElement>) => {
+        if (evt.key === key) {
+            action();
+        }
+    };
 }
 
 export const FileExplorer: React.FC<FileExplorerProps> = ({
@@ -18,21 +26,12 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({
     selected,
     className,
 }) => {
-    const [newFileName, setNewFileName] = useState('');
+    const newFileInput = useRef<HTMLInputElement>(null);
 
-    const addNewFile = (
-        evt:
-            | React.MouseEvent<HTMLButtonElement>
-            | React.KeyboardEvent<HTMLButtonElement | HTMLInputElement>
-    ) => {
-        const filePath =
-            evt.currentTarget.localName === 'input'
-                ? evt.currentTarget.value
-                : (evt.currentTarget.previousElementSibling as HTMLInputElement).value;
-
-        if (filePath) {
-            onAddFile(filePath);
-            setNewFileName('');
+    const addNewFile = () => {
+        if (newFileInput.current?.value) {
+            onAddFile(newFileInput.current.value);
+            newFileInput.current.value = '';
         }
     };
 
@@ -41,11 +40,14 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({
             <h2 className={classes.title}>Files:</h2>
             <div className={classes.fileEntries}>
                 {files.sort().map((file) => (
-                    <div key={file} className={st(classes.fileEntry, { selected: file === selected })}>
-                        <button onClick={onSelect} className={classes.label}>
+                    <div
+                        key={file}
+                        className={st(classes.fileEntry, { selected: file === selected })}
+                    >
+                        <button onClick={() => onSelect(file)} className={classes.label}>
                             {file.slice(1)}
                         </button>
-                        <button onClick={onRemove} className={classes.remove}>
+                        <button onClick={() => onRemove(file)} className={classes.remove}>
                             X
                         </button>
                     </div>
@@ -53,28 +55,13 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({
             </div>
             <div className={classes.newFileEntry}>
                 <input
+                    ref={newFileInput}
                     type="text"
                     placeholder="Enter new file name..."
-                    value={newFileName}
-                    onChange={(evt) => {
-                        setNewFileName(evt.target.value);
-                    }}
-                    onKeyPress={(evt) => {
-                        if (evt.key === 'Enter') {
-                            addNewFile(evt);
-                        }
-                    }}
+                    onKeyPress={bindKey('Enter', addNewFile)}
                     className={classes.newFileInput}
                 />
-                <button
-                    onClick={addNewFile}
-                    onKeyPress={(evt) => {
-                        if (evt.key === 'Enter') {
-                            addNewFile(evt);
-                        }
-                    }}
-                    className={classes.addNewFile}
-                >
+                <button onClick={addNewFile} className={classes.addNewFile}>
                     +
                 </button>
             </div>

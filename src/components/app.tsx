@@ -1,7 +1,6 @@
-import type { IDirectoryContents } from '@file-services/types';
 import { createCjsModuleSystem } from '@file-services/commonjs';
 import { createMemoryFs } from '@file-services/memory';
-import { noCollisionNamespace, Stylable } from '@stylable/core';
+import { Diagnostic, noCollisionNamespace, Stylable, StylableMeta } from '@stylable/core';
 import React, { useEffect, useState } from 'react';
 
 import { st, classes } from './app.st.css';
@@ -10,144 +9,132 @@ import { Header } from './header';
 import Editor, { ControlledEditor } from '@monaco-editor/react';
 import { FileExplorer } from './file-explorer/file-explorer';
 
-const file1 = '/index.st.css';
-const file2 = '/button.st.css';
-const file3 = '/project.st.css';
-const data: IDirectoryContents = {
-    [file1]: `:import {
-        -st-from: './project.st.css';
-        -st-named: active, danger;
-    }
-:import {
-    -st-from: './button.st.css';
-    -st-default: Button;
-}
-.root {}
-
-.okButton {
-    -st-extends: Button;
-    color: value(activ); 
-}
-
-.okButton::label {
-    font-size: 1.5em;
-}
-
-.cancelButton {
-    -st-extends: Button;
-    color: value(danger); 
-}
-`,
-    [file2]: `.root {}
-.label {}
-.icon {}
-`,
-    [file3]: `:vars {
-    active: green;
-    danger: red;
-}`,
-};
-const fs = createMemoryFs(data);
-const moduleSystem = createCjsModuleSystem({ fs });
-
-const stylable = new Stylable(
-    '/',
-    fs,
-    moduleSystem.requireModule,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    noCollisionNamespace()
-);
+const DEFAULT_EXT = '.st.css';
 
 export interface AppProps {
     className?: string;
+    model: AppModel;
 }
-let firstLoad = true;
-export const App: React.FC<AppProps> = ({ className }) => {
-    function removeFile(filePath: string) {
-        const fileList = Object.keys(files);
-        if (fileList.length > 1) {
-            if (currentFilePath === filePath) {
-                if (fileList[0] === filePath) {
-                    setCurrentFilePath(fileList[1]);
-                } else {
-                    setCurrentFilePath(fileList[0]);
-                }
-            }
 
-            delete files[filePath];
-            setFiles({ ...files });
+export class AppModel {
+    fs = createMemoryFs();
+    moduleSystem = createCjsModuleSystem({ fs: this.fs });
+    stylable = new Stylable(
+        '/',
+        this.fs,
+        this.moduleSystem.requireModule,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        noCollisionNamespace()
+    );
+    files: Record<string, string> = {};
+    selected = '';
+    meta?: StylableMeta;
+    diagnostics: Diagnostic[] = [];
+    constructor() {
+        const searchParams = new URLSearchParams(document.location.hash.slice(1));
+        const urlFiles = searchParams.get('files');
+        if (!urlFiles) {
+            const { files, selected } = createSampleData();
+            this.fs.populateDirectorySync('/', files);
+            this.files = files;
+            this.selected = selected;
+            this.updateHash();
         } else {
-            alert('cannot delete last remaining file');
+            this.files = JSON.parse(urlFiles) as Record<string, string>;
+            this.selected = searchParams.get('selected') || Object.keys(this.files)[0];
+            this.fs.populateDirectorySync('/', this.files);
         }
+        this.setSelected(this.selected);
+    }
+    onChange? = (): void => undefined;
+    private _onChangeId?: number = undefined;
+    private _onChange = (): void => {
+        if (this._onChangeId === undefined) {
+            this._onChangeId = requestAnimationFrame(() => {
+                this._onChangeId = undefined;
+                this.updateHash();
+                this.onChange?.();
+            });
+        }
+    };
+    updateHash(): void {
+        const searchParams = new URLSearchParams();
+        searchParams.set('files', JSON.stringify(this.files));
+        searchParams.set('selected', this.selected);
+        document.location.hash = searchParams.toString();
     }
 
-    function addFile(fileName: string) {
-        const filePath = `/${fileName}`;
-
-        if (!files[filePath]) {
-            fs.writeFileSync(filePath, '');
-            setFiles({ ...files, [filePath]: '' });
+    addFile = (fileName: string): void => {
+        const filePath = getFilePathFromUserInput(fileName, this.fs.extname(fileName));
+        if (!this.files[filePath]) {
+            this.fs.writeFileSync(filePath, '');
+            this.files[filePath] = '';
+            this.setSelected(filePath);
         }
-    }
+    };
+    removeFile = (filePath: string): void => {
+        delete this.files[filePath];
+        this.fs.removeSync(filePath);
+        if (!this.files[this.selected]) {
+            const names = Object.keys(this.files);
+            if (names.length === 0) {
+                const fileName = 'playground.st.css';
+                this.addFile(fileName);
+                this.setSelected('/' + fileName);
+            } else {
+                this.setSelected(names[0]);
+            }
+        } else {
+            this._onChange();
+        }
+    };
+    setSelected = (filePath: string): void => {
+        this.selected = filePath;
+        this.meta = this.stylable.process(this.selected);
+        this.stylable.createTransformer().transform(this.meta);
+        this.diagnostics = this.meta.diagnostics.reports.concat(
+            this.meta.transformDiagnostics?.reports || []
+        );
+        this._onChange();
+    };
+    updateSelected = (value = ''): void => {
+        this.fs.writeFileSync(this.selected, value);
+        this.files[this.selected] = value;
+        this.setSelected(this.selected);
+    };
+}
 
-    const [files, setFiles] = useState<IDirectoryContents>(data);
-    const [currentFilePath, setCurrentFilePath] = useState<string>(file1);
+function useForceUpdate() {
+    const [value, set] = useState(false);
+    return () => set(!value);
+}
+
+export const App: React.FC<AppProps> = ({ className, model }) => {
+    const { files, selected, setSelected, addFile, removeFile, updateSelected, meta } = model;
+    const forceUpdate = useForceUpdate();
 
     useEffect(() => {
-        const url = document.location;
-        const searchParams = new URLSearchParams(url.hash);
-        const urlFiles = searchParams.get('files');
-        const localFiles = JSON.stringify(files);
-
-        if (!urlFiles) {
-            searchParams.set('files', localFiles);
-            document.location.hash = searchParams.toString();
-            firstLoad = false;
-        } else {
-            if (firstLoad) {
-                setFiles(JSON.parse(urlFiles));
-                firstLoad = false;
-            } else {
-                searchParams.set('files', localFiles);
-                document.location.hash = searchParams.toString();
-            }
-        }
-    }, [files]);
-
-    const meta = stylable.process(currentFilePath);
-    stylable.createTransformer().transform(meta);
-
-    const diagnostics = meta.diagnostics.reports
-        .concat(meta.transformDiagnostics?.reports || [])
-        .map((r, i) => <li key={i}>{`${meta.source} - ${r.type} - ${r.message}`}</li>);
+        model.onChange = forceUpdate;
+        return () => {
+            model.onChange = undefined;
+        };
+    });
 
     return (
         <main className={st(classes.root, className)}>
             <Header className={classes.header} />
-
             <FileExplorer
                 filePaths={Object.keys(files)}
-                onSelect={(evt) => {
-                    const filePath = `/${evt.currentTarget.textContent as string}`;
-
-                    setCurrentFilePath(filePath);
-                }}
-                onRemove={(evt) => {
-                    const filePath = `/${
-                        (evt.currentTarget.previousElementSibling as HTMLButtonElement)
-                            .textContent as string
-                    }`;
-
-                    removeFile(filePath);
-                }}
+                onSelect={setSelected}
+                onRemove={removeFile}
                 onAddFile={addFile}
-                selected={currentFilePath}
+                selected={selected}
                 className={classes.fileExplorer}
             />
             <section className={classes.editors}>
@@ -155,11 +142,8 @@ export const App: React.FC<AppProps> = ({ className }) => {
                     <h2 className={classes.cardTitle}>Source:</h2>
                     <div className={classes.cardMain}>
                         <ControlledEditor
-                            value={files[currentFilePath] as string}
-                            onChange={(_evt, val = '') => {
-                                fs.writeFileSync(currentFilePath, val || '');
-                                setFiles({ ...files, [currentFilePath]: val });
-                            }}
+                            value={files[selected]}
+                            onChange={(_, value) => updateSelected(value)}
                             language="css"
                             options={{ minimap: { enabled: false }, scrollBeyondLastLine: false }}
                         />
@@ -169,7 +153,7 @@ export const App: React.FC<AppProps> = ({ className }) => {
                     <h2 className={classes.cardTitle}>Target:</h2>
                     <div className={classes.cardMain}>
                         <Editor
-                            value={meta.outputAst?.toString()}
+                            value={meta?.outputAst?.toString()}
                             language="css"
                             options={{
                                 readOnly: true,
@@ -196,10 +180,67 @@ export const App: React.FC<AppProps> = ({ className }) => {
                 <div className={classes.diagnostics}>
                     <h2 className={classes.cardTitle}>Diagnostics:</h2>
                     <div className={classes.cardMain}>
-                        <ul>{diagnostics}</ul>
+                        <ul>
+                            {model.diagnostics.map((r, i) => (
+                                <li key={i}>{`${model.meta?.source || ''} - ${r.type} - ${
+                                    r.message
+                                }`}</li>
+                            ))}
+                        </ul>
                     </div>
                 </div>
             </section>
         </main>
     );
 };
+
+function createSampleData() {
+    const file1 = '/index.st.css';
+    const file2 = '/button.st.css';
+    const file3 = '/project.st.css';
+    const files: Record<string, string> = {
+        [file1]: `:import {
+        -st-from: './project.st.css';
+        -st-named: active, danger;
+    }
+:import {
+    -st-from: './button.st.css';
+    -st-default: Button;
+}
+.root {}
+
+.okButton {
+    -st-extends: Button;
+    color: value(activ); 
+}
+
+.okButton::label {
+    font-size: 1.5em;
+}
+
+.cancelButton {
+    -st-extends: Button;
+    color: value(danger); 
+}
+`,
+        [file2]: `.root {}
+.label {}
+.icon {}
+`,
+        [file3]: `:vars {
+    active: green;
+    danger: red;
+}`,
+    };
+    return { files, selected: file1 };
+}
+
+function getFilePathFromUserInput(fileName: string, ext: string) {
+    if (!ext) {
+        return `/${fileName}${DEFAULT_EXT}`;
+    } else if (ext === '.') {
+        return `/${fileName.slice(-1)}${DEFAULT_EXT}`;
+    } else {
+        return `/${fileName}`;
+    }
+}
