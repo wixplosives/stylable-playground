@@ -8,9 +8,13 @@
     -st-default: FileExplorer;
 }
 
-/* * {
-    outline: 1px solid red;
-} */
+html, body {
+    height: 100%;
+}
+
+#playground{
+    height: 100%;
+}
 
 :vars {
     bgMain: rgb(42, 42, 42);
@@ -19,11 +23,11 @@
     bgHover: rgb(150, 255, 146);
     textMain: rgb(34, 34, 34);
     textActive: rgb(255, 217, 0);
-    roundedCorner: 6px;
+    roundedCorner: 0px;
     largeGap: 1.5em;
     mediumGap: 0.85em;
     smallGap: 0.25em;
-    shadow: 10px 10px 10px 0px rgba(0, 0, 0, 0.1);
+    shadow: 0px 0px 0px 0px rgba(0, 0, 0, 0.1);
     tinyText: 0.85em;
     smallText: 1em;
     mediumText: 1.5em;
@@ -31,22 +35,36 @@
 }
 
 .root {
-    height: 100vh;
+    height: 100%;
     display: grid;
-    grid-template-columns: 1fr 4fr 4fr;
-    grid-template-rows: auto 5fr 5fr;
-    gap: value(mediumGap) value(mediumGap);
+    grid-template-columns: auto 1fr; 
+    grid-template-rows: auto 1fr; 
+    /* gap: value(mediumGap) value(mediumGap); */
     grid-template-areas:
-        "header header header"
-        "fileExplorer source target"
-        "fileExplorer ast diagnostics";
+        "header header"
+        "fileExplorer editors"
+        "fileExplorer editors";
     background-color: value(bgSecondary);
+}
+
+
+.editors {
+    overflow: hidden;
+    display: grid;
+    grid-template-areas:
+        "source target"
+        "ast diagnostics";
+    grid-template-columns: 50% 50%; 
+    grid-template-rows:  50% 50%; 
+
 }
 
 .header {
     -st-extends: Header;
     grid-area: header;
-    background-color: value(bgMain);
+    background-color: rgb(40, 40, 40);
+    box-shadow: 0px 0px 4px 0px black;
+    z-index: 1;
 }
 
 .header::title {
@@ -64,11 +82,9 @@
 
 .fileExplorer {
     -st-extends: FileExplorer;
-    background-color: value(bgMain);
-    padding: 0px value(mediumGap);
+    background-color: rgb(45,45,45); 
+    padding: 0px value(smallGap);
     border-radius: value(roundedCorner);
-    margin-inline-start: value(mediumGap);
-    margin-block-end: value(largeGap);
     box-shadow: value(shadow)
 }
 
@@ -83,6 +99,7 @@
 }
 
 .fileExplorer::label {
+    padding: 1em; 
     flex: 1;
     border: 0;
     font-size: inherit;
@@ -108,16 +125,13 @@
 .fileExplorer::newFileEntry {
     display: flex;
     font-size: value(smallText);
-    margin-block-start: value(largeGap);
-    margin-block-end: value(largeGap);
 }
 
 .fileExplorer::newFileInput {
+     padding: 1em; 
     font-size: value(tinyText);
     flex: 1;
-    border-radius: 0px;
     border: none;
-    padding: 0px 6px;
 }
 
 .fileExplorer::addNewFile {
@@ -128,46 +142,48 @@
 }
 
 .card {
-    border-radius: value(roundedCorner);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    position: relative;
     box-shadow: value(shadow);
     background: #ffffff;
+    display: grid;  
+    grid-template-rows: auto 1fr;
 }
 
 .cardTitle {
-    margin: value(mediumGap);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    margin: 0;
+    padding: 0.5em;
     font-family: monospace;
     font-size: value(mediumText);
+    background: linear-gradient(rgba(0,0,0,0.03),rgba(0,0,0,0.0));
+}
+.cardMain {
+
 }
 
 .source {
-    -st-mixin: card;
+    -st-extends: card;
     grid-area: source;
-    overflow: hidden;
 }
 
 .target {
-    -st-mixin: card;
+    -st-extends: card;
     grid-area: target;
-    overflow: hidden;
-    margin-inline-end: value(largeGap);
 }
 
 .ast {
-    -st-mixin: card;
+    -st-extends: card;
     grid-area: ast;
-    overflow: hidden;
-    margin-block-end: value(largeGap);
 }
 
 .diagnostics {
-    -st-mixin: card;
+    -st-extends: card;
     grid-area: diagnostics;
     font-family: monospace;
-    margin-inline-end: 2em;
-    margin-block-end: 2em;
 }
 
-@media (max-width: 600px) {
+/* @media (max-width: 600px) {
     .root {
         display: flex;
         flex-direction: column;
@@ -184,4 +200,4 @@
         margin: 6px;
         height: 400px;
     }
-}
+} */

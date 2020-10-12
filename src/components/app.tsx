@@ -98,7 +98,7 @@ export const App: React.FC<AppProps> = ({ className }) => {
 
     const [files, setFiles] = useState<IDirectoryContents>(data);
     const [currentFilePath, setCurrentFilePath] = useState<string>(file1);
-    
+
     useEffect(() => {
         const url = document.location;
         const searchParams = new URLSearchParams(url.hash);
@@ -150,38 +150,56 @@ export const App: React.FC<AppProps> = ({ className }) => {
                 selected={currentFilePath}
                 className={classes.fileExplorer}
             />
-            <div className={classes.source}>
-                <h2 className={classes.cardTitle}>Source:</h2>
-                <ControlledEditor
-                    value={files[currentFilePath] as string}
-                    onChange={(_evt, val = '') => {
-                        fs.writeFileSync(currentFilePath, val || '');
-                        setFiles({ ...files, [currentFilePath]: val });
-                    }}
-                    language="css"
-                    options={{ minimap: { enabled: false } }}
-                />
-            </div>
-            <div className={classes.target}>
-                <h2 className={classes.cardTitle}>Target:</h2>
-                <Editor
-                    value={meta.outputAst?.toString()}
-                    language="css"
-                    options={{ readOnly: true, minimap: { enabled: false } }}
-                />
-            </div>
-            <div className={classes.ast}>
-                <h2 className={classes.cardTitle}>Meta & AST:</h2>
-                <Editor
-                    value={JSON.stringify(meta, null, 2)}
-                    language="json"
-                    options={{ readOnly: true, minimap: { enabled: false } }}
-                />
-            </div>
-            <div className={classes.diagnostics}>
-                <h2 className={classes.cardTitle}>Diagnostics:</h2>
-                <ul>{diagnostics}</ul>
-            </div>
+            <section className={classes.editors}>
+                <div className={classes.source}>
+                    <h2 className={classes.cardTitle}>Source:</h2>
+                    <div className={classes.cardMain}>
+                        <ControlledEditor
+                            value={files[currentFilePath] as string}
+                            onChange={(_evt, val = '') => {
+                                fs.writeFileSync(currentFilePath, val || '');
+                                setFiles({ ...files, [currentFilePath]: val });
+                            }}
+                            language="css"
+                            options={{ minimap: { enabled: false }, scrollBeyondLastLine: false }}
+                        />
+                    </div>
+                </div>
+                <div className={classes.target}>
+                    <h2 className={classes.cardTitle}>Target:</h2>
+                    <div className={classes.cardMain}>
+                        <Editor
+                            value={meta.outputAst?.toString()}
+                            language="css"
+                            options={{
+                                readOnly: true,
+                                minimap: { enabled: false },
+                                scrollBeyondLastLine: false,
+                            }}
+                        />
+                    </div>
+                </div>
+                <div className={classes.ast}>
+                    <h2 className={classes.cardTitle}>Meta & AST:</h2>
+                    <div className={classes.cardMain}>
+                        <Editor
+                            value={JSON.stringify(meta, null, 2)}
+                            language="json"
+                            options={{
+                                readOnly: true,
+                                minimap: { enabled: false },
+                                scrollBeyondLastLine: false,
+                            }}
+                        />
+                    </div>
+                </div>
+                <div className={classes.diagnostics}>
+                    <h2 className={classes.cardTitle}>Diagnostics:</h2>
+                    <div className={classes.cardMain}>
+                        <ul>{diagnostics}</ul>
+                    </div>
+                </div>
+            </section>
         </main>
     );
 };
