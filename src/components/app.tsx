@@ -28,6 +28,8 @@ export class AppModel {
     selected = '';
     meta?: StylableMeta;
     diagnostics: Diagnostic[] = [];
+    onChange? = (): void => undefined;
+    private _onChangeId?: number = undefined;
     constructor() {
         const searchParams = new URLSearchParams(document.location.hash.slice(1));
         const urlFiles = searchParams.get('files');
@@ -44,8 +46,6 @@ export class AppModel {
         }
         this.setSelected(this.selected);
     }
-    onChange? = (): void => undefined;
-    private _onChangeId?: number = undefined;
     private _onChange = (): void => {
         if (this._onChangeId === undefined) {
             this._onChangeId = requestAnimationFrame(() => {
@@ -61,7 +61,6 @@ export class AppModel {
         searchParams.set('selected', this.selected);
         document.location.hash = searchParams.toString();
     }
-
     addFile = (fileName: string): void => {
         const filePath = getFilePathFromUserInput(fileName, this.fs.extname(fileName));
         if (!this.files[filePath]) {
@@ -189,6 +188,8 @@ function cleanMeta(meta?: StylableMeta) {
 }
 
 function resizeEditor(_: unknown, editor: { getContainerDomNode(): HTMLElement; layout(): void }) {
+    // work around monaco resize by setting the container overflow to hidden then calc content size and reset the overflow
+    // this function relies in the structure of the editor container
     const resize = () => {
         try {
             const el = editor.getContainerDomNode().parentElement?.parentElement as HTMLElement;
