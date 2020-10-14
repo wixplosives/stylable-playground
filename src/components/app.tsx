@@ -125,8 +125,8 @@ export const App: React.FC<AppProps> = ({ className, model }) => {
             />
             <section className={classes.editors}>
                 <div className={classes.source}>
-                    <h2 className={classes.cardTitle}>Source:</h2>
-                    <div className={classes.cardMain}>
+                    <h2 className={classes.editorTitle}>Source:</h2>
+                    <div>
                         <ControlledEditor
                             value={files[selected]}
                             onChange={(_, value) => updateSelected(value)}
@@ -137,8 +137,8 @@ export const App: React.FC<AppProps> = ({ className, model }) => {
                     </div>
                 </div>
                 <div className={classes.target}>
-                    <h2 className={classes.cardTitle}>Target:</h2>
-                    <div className={classes.cardMain}>
+                    <h2 className={classes.editorTitle}>Target:</h2>
+                    <div>
                         <Editor
                             value={meta?.outputAst?.toString()}
                             language="css"
@@ -152,10 +152,10 @@ export const App: React.FC<AppProps> = ({ className, model }) => {
                     </div>
                 </div>
                 <div className={classes.ast}>
-                    <h2 className={classes.cardTitle}>Meta & AST:</h2>
-                    <div className={classes.cardMain}>
+                    <h2 className={classes.editorTitle}>Meta & AST:</h2>
+                    <div>
                         <Editor
-                            value={JSON.stringify(meta, null, 2)}
+                            value={JSON.stringify(cleanMeta(meta), null, 2)}
                             language="json"
                             options={{
                                 readOnly: true,
@@ -167,8 +167,8 @@ export const App: React.FC<AppProps> = ({ className, model }) => {
                     </div>
                 </div>
                 <div className={classes.diagnostics}>
-                    <h2 className={classes.cardTitle}>Diagnostics:</h2>
-                    <div className={classes.cardMain}>
+                    <h2 className={classes.editorTitle}>Diagnostics:</h2>
+                    <div>
                         <ul>
                             {model.diagnostics.map((r, i) => (
                                 <li key={i}>{`${model.meta?.source || ''} - ${r.type} - ${
@@ -182,6 +182,12 @@ export const App: React.FC<AppProps> = ({ className, model }) => {
         </main>
     );
 };
+
+function cleanMeta(meta?: StylableMeta) {
+    const { ast, outputAst, rawAst, parent, ...cleanMeta } = meta || {};
+    // safelyWalkJSON(cleanMeta as Record<string | number, unknown>, (key) => {});
+    return cleanMeta;
+}
 
 function resizeEditor(_: unknown, editor: { getContainerDomNode(): HTMLElement; layout(): void }) {
     const resize = () => {
@@ -252,4 +258,27 @@ function useForceUpdate(): () => void {
     const [, dispatch] = useState(Object.create(null));
     const memoizedDispatch = useCallback((): void => dispatch(Object.create(null)), [dispatch]);
     return memoizedDispatch;
+}
+
+function safelyWalkJSON(
+    obj: Record<string | number, unknown>,
+    visitor: (key: string, value: unknown, path: string[]) => boolean | void,
+    path: string[] = [],
+    visited = new Set()
+) {
+    for (const key in obj) {
+        const currentPath = [...path, key];
+        if (visited.has(obj[key])) {
+            continue;
+        } else {
+            visited.add(obj[key]);
+        }
+        const res = visitor(key, obj[key], currentPath);
+        if (res === false) {
+            continue;
+        }
+        if (typeof obj[key] === 'object') {
+            safelyWalkJSON(obj[key] as Record<string | number, unknown>, visitor, currentPath, visited);
+        }
+    }
 }

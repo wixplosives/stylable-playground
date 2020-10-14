@@ -8,22 +8,21 @@
     -st-default: FileExplorer;
 }
 
-html, body {
+html,
+body {
     height: 100%;
 }
 
-#playground{
+#playground {
     height: 100%;
 }
 
 :vars {
     bgMain: rgb(42, 42, 42);
-    bgSecondary: rgb(201, 207, 207);
     bgContrast: rgba(255, 255, 255, 0.9);
     bgHover: rgb(150, 255, 146);
     textMain: rgb(34, 34, 34);
     textActive: rgb(255, 217, 0);
-    roundedCorner: 0px;
     largeGap: 1.5em;
     mediumGap: 0.85em;
     smallGap: 0.25em;
@@ -37,15 +36,14 @@ html, body {
 .root {
     height: 100%;
     display: grid;
-    grid-template-columns: auto 1fr; 
-    grid-template-rows: auto 1fr; 
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto 1fr;
     grid-template-areas:
         "header header"
         "fileExplorer editors"
         "fileExplorer editors";
-    background-color: value(bgSecondary);
     font-family: monospace;
-
+    background-color: rgb(45, 45, 45);
 }
 
 
@@ -55,8 +53,8 @@ html, body {
     grid-template-areas:
         "source target"
         "ast diagnostics";
-    grid-template-columns: 50% 50%; 
-    grid-template-rows:  50% 50%; 
+    grid-template-columns: 50% 50%;
+    grid-template-rows: 50% 50%;
 
 }
 
@@ -81,14 +79,12 @@ html, body {
 
 .fileExplorer {
     -st-extends: FileExplorer;
-    background-color: rgb(45,45,45); 
     padding: 0px value(smallGap);
     border-radius: value(roundedCorner);
     font-size: value(smallText);
-    min-width: 35ch;
 }
 
-.fileExplorer::title{
+.fileExplorer::title {
     font-size: value(mediumText);
     padding: 0.5em 0;
     margin: 0;
@@ -105,18 +101,23 @@ html, body {
 
 .fileExplorer::label {
     text-align: start;
-    padding: 1em 0.5em; 
+    padding: 1em 0.5em;
     flex: 1;
     border: 0;
     cursor: pointer;
     background: rgba(255, 255, 255, 0);
+    min-width: 35ch;
+    max-width: 55ch;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
 .fileExplorer::remove {
     border: 0;
     cursor: pointer;
     background-color: rgba(255, 255, 255, 0);
-    width: 2em;
+    width: 3em;
     padding: 0;
 }
 
@@ -133,8 +134,7 @@ html, body {
 }
 
 .fileExplorer::newFileInput {
-    padding: 1em 0.5em; 
-    font-size: inherit;
+    padding: 1em 0.5em;
     flex: 1;
     border: none;
 }
@@ -143,65 +143,83 @@ html, body {
     border: 0;
     cursor: pointer;
     background-color: value(textActive);
-    width: 2em;
+    width: 3em;
     padding: 0;
 }
 
-.card {
+.editor {
     border: 1px solid rgba(0, 0, 0, 0.2);
     position: relative;
     box-shadow: value(shadow);
     background: #ffffff;
-    display: grid;  
+    display: grid;
     grid-template-rows: auto 1fr;
 }
 
-.cardTitle {
+.editorTitle {
     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     margin: 0;
     padding: 0.5em;
     font-size: value(mediumText);
-    background: linear-gradient(rgba(0,0,0,0.03),rgba(0,0,0,0.0));
-}
-.cardMain {
-
+    background: linear-gradient(rgba(0, 0, 0, 0.03), rgba(0, 0, 0, 0.0));
 }
 
 .source {
-    -st-extends: card;
+    -st-extends: editor;
     grid-area: source;
 }
 
 .target {
-    -st-extends: card;
+    -st-extends: editor;
     grid-area: target;
 }
 
 .ast {
-    -st-extends: card;
+    -st-extends: editor;
     grid-area: ast;
 }
 
 .diagnostics {
-    -st-extends: card;
+    -st-extends: editor;
     grid-area: diagnostics;
 }
 
-/* @media (max-width: 600px) {
+@media (max-width: 600px) {
     .root {
+        height: auto;
+
         display: flex;
         flex-direction: column;
-        height: auto;
-        gap: 12px;
     }
+
+
+    .header::title {
+        justify-content: center;
+    }
+
+    .header::icon {
+        margin: 0;
+        margin-right: value(mediumGap);
+    }
+
 
     .fileExplorer {
-        margin: 0;
-        border-radius: 0px;
+        margin-bottom: value(smallGap);
     }
 
-    .source, .target, .ast, .diagnostics {
-        margin: 6px;
+    .fileExplorer::label {
+        max-width: unset;
+    }
+
+    .editors {
+        display: flex;
+        flex-direction: column;
+        padding: 0px value(smallGap);
+    }
+
+    .editor {
+        margin-top: value(smallGap);
         height: 400px;
     }
-} */
+
+}
