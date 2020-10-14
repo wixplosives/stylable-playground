@@ -2,6 +2,8 @@
 :global(::before),
 :global(::after) {
     box-sizing: border-box;
+    font-family: inherit;
+    font-size: inherit;
 }
 
 :global(html),
