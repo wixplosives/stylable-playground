@@ -185,7 +185,6 @@ export const App: React.FC<AppProps> = ({ className, model }) => {
 
 function cleanMeta(meta?: StylableMeta) {
     const { ast, outputAst, rawAst, parent, ...cleanMeta } = meta || {};
-    // safelyWalkJSON(cleanMeta as Record<string | number, unknown>, (key) => {});
     return cleanMeta;
 }
 
@@ -258,27 +257,4 @@ function useForceUpdate(): () => void {
     const [, dispatch] = useState(Object.create(null));
     const memoizedDispatch = useCallback((): void => dispatch(Object.create(null)), [dispatch]);
     return memoizedDispatch;
-}
-
-function safelyWalkJSON(
-    obj: Record<string | number, unknown>,
-    visitor: (key: string, value: unknown, path: string[]) => boolean | void,
-    path: string[] = [],
-    visited = new Set()
-) {
-    for (const key in obj) {
-        const currentPath = [...path, key];
-        if (visited.has(obj[key])) {
-            continue;
-        } else {
-            visited.add(obj[key]);
-        }
-        const res = visitor(key, obj[key], currentPath);
-        if (res === false) {
-            continue;
-        }
-        if (typeof obj[key] === 'object') {
-            safelyWalkJSON(obj[key] as Record<string | number, unknown>, visitor, currentPath, visited);
-        }
-    }
 }
