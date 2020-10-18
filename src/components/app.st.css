@@ -8,8 +8,8 @@
     -st-default: FileExplorer;
 }
 
-html,
-body {
+:global(html),
+:global(body) {
     height: 100%;
 }
 
@@ -81,7 +81,6 @@ body {
 .fileExplorer {
     -st-extends: FileExplorer;
     padding: 0px value(smallGap);
-    border-radius: value(roundedCorner);
     font-size: value(smallText);
 }
 
