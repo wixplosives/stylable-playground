@@ -8,8 +8,8 @@
     -st-default: FileExplorer;
 }
 
-html,
-body {
+:global(html),
+:global(body) {
     height: 100%;
 }
 
@@ -21,6 +21,7 @@ body {
     bgMain: rgb(42, 42, 42);
     bgContrast: rgba(255, 255, 255, 0.9);
     bgHover: rgb(150, 255, 146);
+    bgWarning: rgb(255, 146, 146);
     textMain: rgb(34, 34, 34);
     textActive: rgb(255, 217, 0);
     largeGap: 1.5em;
@@ -36,7 +37,7 @@ body {
 .root {
     height: 100%;
     display: grid;
-    grid-template-columns: auto 1fr;
+    grid-template-columns: 300px 1fr;
     grid-template-rows: auto 1fr;
     grid-template-areas:
         "header header"
@@ -80,7 +81,6 @@ body {
 .fileExplorer {
     -st-extends: FileExplorer;
     padding: 0px value(smallGap);
-    border-radius: value(roundedCorner);
     font-size: value(smallText);
 }
 
@@ -113,7 +113,7 @@ body {
     overflow: hidden;
 }
 
-.fileExplorer::remove {
+.fileExplorer::remove, .fileExplorer::cancelRemove {
     border: 0;
     cursor: pointer;
     background-color: rgba(255, 255, 255, 0);
@@ -127,6 +127,9 @@ body {
 
 .fileExplorer::fileEntry:selected {
     background-color: value(textActive);
+}
+.fileExplorer::fileEntry:markedForDeletion {
+    background-color: value(bgWarning);
 }
 
 .fileExplorer::newFileEntry {
@@ -209,6 +212,7 @@ body {
 
     .fileExplorer::label {
         max-width: unset;
+        min-width: unset;
     }
 
     .editors {

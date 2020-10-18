@@ -209,9 +209,9 @@ function createSampleData() {
     const file3 = '/project.st.css';
     const files: Record<string, string> = {
         [file1]: `:import {
-        -st-from: './project.st.css';
-        -st-named: active, danger;
-    }
+    -st-from: './project.st.css';
+    -st-named: active, danger;
+}
 :import {
     -st-from: './button.st.css';
     -st-default: Button;

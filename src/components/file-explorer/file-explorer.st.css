@@ -7,12 +7,13 @@
 .fileEntries {}
 
 .fileEntry {
-    -st-states: selected;
+    -st-states: selected, markedForDeletion;
 }
 
 .label {}
 
 .remove {}
+.cancelRemove {}
 
 .newFileEntry {}
 

@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { st, classes } from './file-explorer.st.css';
 
 export interface FileExplorerProps {
@@ -35,23 +35,57 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({
         }
     };
 
+    const [markedForDeletion, updateMarkedForDeletion] = useState<string>(``);
+
+    const onRemoveClick = (file: string) => {
+        if (markedForDeletion === file) {
+            updateMarkedForDeletion(``);
+            onRemove(file);
+        } else {
+            updateMarkedForDeletion(file);
+        }
+    };
+
     return (
         <div className={st(classes.root, className)}>
             <h2 className={classes.title}>Files:</h2>
             <div className={classes.fileEntries}>
-                {files.sort().map((file) => (
-                    <div
-                        key={file}
-                        className={st(classes.fileEntry, { selected: file === selected })}
-                    >
-                        <button onClick={() => onSelect(file)} className={classes.label}>
-                            {file.slice(1)}
-                        </button>
-                        <button onClick={() => onRemove(file)} className={classes.remove}>
-                            X
-                        </button>
-                    </div>
-                ))}
+                {files.sort().map((file) => {
+                    const promptDelete = markedForDeletion === file;
+                    return (
+                        <div
+                            key={file}
+                            className={st(classes.fileEntry, {
+                                selected: file === selected,
+                                markedForDeletion: promptDelete,
+                            })}
+                        >
+                            <button onClick={() => onSelect(file)} className={classes.label}>
+                                {file.slice(1)}
+                            </button>
+                            {promptDelete ? (
+                                <button
+                                    onClick={(event) => {
+                                        event.stopPropagation();
+                                        updateMarkedForDeletion(``);
+                                    }}
+                                    className={classes.cancelRemove}
+                                >
+                                    {`❌`}
+                                </button>
+                            ) : null}
+                            <button
+                                onClick={(event) => {
+                                    event.stopPropagation();
+                                    onRemoveClick(file);
+                                }}
+                                className={classes.remove}
+                            >
+                                {markedForDeletion !== file ? `🗑️` : `✔️`}
+                            </button>
+                        </div>
+                    );
+                })}
             </div>
             <div className={classes.newFileEntry}>
                 <input
