@@ -19,11 +19,12 @@
 
 :vars {
     bgMain: rgb(42, 42, 42);
+    bgSecondary:rgb(70, 70, 70);
     bgContrast: rgba(255, 255, 255, 0.9);
-    bgHover: rgb(150, 255, 146);
+    bgHover: rgb(62, 138, 78);
     bgWarning: rgb(255, 146, 146);
     textMain: rgb(34, 34, 34);
-    textActive: rgb(255, 217, 0);
+    textActive: rgb(81, 179, 101);
     largeGap: 1.5em;
     mediumGap: 0.85em;
     smallGap: 0.25em;
@@ -51,11 +52,7 @@
 .editors {
     overflow: hidden;
     display: grid;
-    grid-template-areas:
-        "source target"
-        "ast diagnostics";
-    grid-template-columns: 50% 50%;
-    grid-template-rows: 50% 50%;
+    grid-template: 1fr 1fr / 1fr 1fr;
 
 }
 
@@ -86,7 +83,7 @@
 
 .fileExplorer::title {
     font-size: value(mediumText);
-    padding: 0.5em 0;
+    padding: 0.5em value(mediumGap);
     margin: 0;
     color: #ffffff
 }
@@ -95,20 +92,18 @@
 
 .fileExplorer::fileEntry {
     display: flex;
-    background-color: value(bgContrast);
-    margin: value(smallGap) 0;
+    background: value(bgSecondary);
+    padding: 0.5em value(mediumGap);
 }
 
 .fileExplorer::label {
     text-align: start;
-    padding: 1em 0.5em;
     flex: 1;
     border: 0;
     cursor: pointer;
     background: rgba(255, 255, 255, 0);
-    min-width: 35ch;
-    max-width: 55ch;
     white-space: nowrap;
+    color: value(bgContrast);
     text-overflow: ellipsis;
     overflow: hidden;
 }
@@ -117,8 +112,12 @@
     border: 0;
     cursor: pointer;
     background-color: rgba(255, 255, 255, 0);
-    width: 3em;
     padding: 0;
+}
+
+.fileExplorer::remove:hover, 
+.fileExplorer::cancelRemove:hover {
+    transform: scale(1.1);
 }
 
 .fileExplorer::fileEntry:hover {
@@ -134,12 +133,13 @@
 
 .fileExplorer::newFileEntry {
     display: flex;
+    margin-top: value(smallGap);
 }
 
 .fileExplorer::newFileInput {
-    padding: 1em 0.5em;
     flex: 1;
     border: none;
+    padding: 0.5em value(mediumGap);
 }
 
 .fileExplorer::addNewFile {
@@ -148,6 +148,11 @@
     background-color: value(textActive);
     width: 3em;
     padding: 0;
+    color: value(bgContrast)
+}
+
+.fileExplorer::addNewFile:hover {
+    background-color: value(bgHover);
 }
 
 .editor {
@@ -169,22 +174,18 @@
 
 .source {
     -st-extends: editor;
-    grid-area: source;
 }
 
 .target {
     -st-extends: editor;
-    grid-area: target;
 }
 
 .ast {
     -st-extends: editor;
-    grid-area: ast;
 }
 
 .diagnostics {
     -st-extends: editor;
-    grid-area: diagnostics;
 }
 
 @media (max-width: 600px) {
