@@ -26,13 +26,16 @@ export class AppModel {
     stylable = Stylable.create({
         projectRoot: '/',
         fileSystem: this.fs,
-        requireModule: this.moduleSystem.requireModule,
+        requireModule: (id) => {
+            this.moduleSystem.loadedModules.clear();
+            return this.moduleSystem.requireModule(id);
+        },
         resolveNamespace: noCollisionNamespace(),
     });
     files: Record<string, string> = {};
     selected = '';
     meta?: StylableMeta;
-    diagnostics: Diagnostic[] = [];
+    diagnostics: Omit<Diagnostic, 'node' | 'options'>[] = [];
     onChange? = (): void => undefined;
     private _onChangeId?: number = undefined;
     constructor() {
@@ -88,10 +91,20 @@ export class AppModel {
     };
     setSelected = (filePath: string): void => {
         this.selected = filePath;
-        this.meta = this.stylable.transform(this.files[this.selected], this.selected).meta;
-        this.diagnostics = this.meta.diagnostics.reports.concat(
-            this.meta.transformDiagnostics?.reports || []
-        );
+        if (this.selected.endsWith('.st.css')) {
+            try {
+                this.meta = this.stylable.transform(this.files[this.selected], this.selected).meta;
+                this.diagnostics = this.meta.diagnostics.reports.concat(
+                    this.meta.transformDiagnostics?.reports || []
+                );
+            } catch (e) {
+                this.meta = undefined;
+                this.diagnostics = [{ type: 'error', message: String(e) }];
+            }
+        } else {
+            this.meta = undefined;
+            this.diagnostics = [];
+        }
         this._onChange();
     };
     updateSelected = (value = ''): void => {
@@ -130,7 +143,7 @@ export const App: React.FC<AppProps> = ({ className, model }) => {
                         <ControlledEditor
                             value={files[selected]}
                             onChange={(_, value) => updateSelected(value)}
-                            language="css"
+                            language={selected.endsWith('.st.css') ? 'css' : 'javascript'}
                             options={{ minimap: { enabled: false }, scrollBeyondLastLine: false }}
                             editorDidMount={resizeEditor}
                         />
@@ -140,7 +153,7 @@ export const App: React.FC<AppProps> = ({ className, model }) => {
                     <h2 className={classes.editorTitle}>Target:</h2>
                     <div>
                         <Editor
-                            value={meta?.outputAst?.toString()}
+                            value={meta?.outputAst?.toString() ?? ''}
                             language="css"
                             options={{
                                 readOnly: true,
@@ -170,10 +183,10 @@ export const App: React.FC<AppProps> = ({ className, model }) => {
                     <h2 className={classes.editorTitle}>Diagnostics:</h2>
                     <div>
                         <ul>
-                            {model.diagnostics.map((r, i) => (
-                                <li key={i}>{`${model.meta?.source || ''} - ${r.type} - ${
-                                    r.message
-                                }`}</li>
+                            {model.diagnostics.map(({ type, message }, i) => (
+                                <li key={i}>{`${
+                                    model.meta?.source ?? ''
+                                } - ${type} - ${message}`}</li>
                             ))}
                         </ul>
                     </div>
