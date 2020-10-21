@@ -3,7 +3,6 @@ import { createMemoryFs } from '@file-services/memory';
 import { Diagnostic, noCollisionNamespace, Stylable, StylableMeta } from '@stylable/core';
 import Editor, { ControlledEditor } from '@monaco-editor/react';
 import React, { useCallback, useEffect, useState } from 'react';
-
 import { JSONCrush, JSONUncrush } from '../json-crush';
 import { FileExplorer } from './file-explorer/file-explorer';
 import { Header } from './header';
@@ -14,6 +13,11 @@ const DEFAULT_EXT = '.st.css';
 export interface AppProps {
     className?: string;
     model: AppModel;
+}
+
+interface URLState {
+    files: Record<string, string>;
+    selected: string;
 }
 
 export class AppModel {
@@ -33,18 +37,13 @@ export class AppModel {
     private _onChangeId?: number = undefined;
     constructor() {
         const searchParams = new URLSearchParams(document.location.hash.slice(1));
-        const crushedState = searchParams.get('state');
-
-        const { files, selected = Object.keys(this.files)[0] } = crushedState
-            ? (JSON.parse(JSONUncrush(crushedState)) as {
-                  files: Record<string, string>;
-                  selected: string;
-              })
+        const state = searchParams.get('state');
+        const { files, selected } = state
+            ? (JSON.parse(JSONUncrush(decodeURIComponent(state))) as URLState)
             : createSampleData();
-
         this.fs.populateDirectorySync('/', files);
         this.files = files;
-        this.setSelected(selected);
+        this.setSelected(selected || Object.keys(files)[0]);
     }
     private _onChange = (): void => {
         if (this._onChangeId === undefined) {
@@ -57,11 +56,10 @@ export class AppModel {
     };
     updateHash(): void {
         const searchParams = new URLSearchParams();
-        const crushedJson = JSONCrush(
-            JSON.stringify({ files: this.files, selected: this.selected })
+        searchParams.set(
+            'state',
+            JSONCrush(JSON.stringify({ files: this.files, selected: this.selected }))
         );
-
-        searchParams.set('state', crushedJson);
         document.location.hash = searchParams.toString();
     }
     addFile = (fileName: string): void => {
