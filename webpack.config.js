@@ -19,5 +19,5 @@ module.exports = {
     resolve: {
         extensions: ['.ts', '.tsx', '.mjs', '.js', '.json'],
     },
-    plugins: [new StylableWebpackPlugin(), new HtmlWebpackPlugin({ title: 'Stylable Playground' })],
+    plugins: [new StylableWebpackPlugin(), new HtmlWebpackPlugin({ title: 'Stylable Playground', favicon: './favicon.ico' })],
 };
