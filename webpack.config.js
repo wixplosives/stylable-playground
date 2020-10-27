@@ -1,9 +1,13 @@
 const { StylableWebpackPlugin } = require('@stylable/webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
+/** @type import('webpack').Configuration */
 module.exports = {
     mode: 'development',
     devtool: 'source-map',
+    output: {
+        filename: '[contenthash].[name].js',
+    },
     module: {
         rules: [
             {
@@ -19,5 +23,10 @@ module.exports = {
     resolve: {
         extensions: ['.ts', '.tsx', '.mjs', '.js', '.json'],
     },
-    plugins: [new StylableWebpackPlugin(), new HtmlWebpackPlugin({ title: 'Stylable Playground', favicon: './favicon.ico' })],
+    plugins: [
+        new StylableWebpackPlugin({
+            filename: '[contenthash].[name].css',
+        }),
+        new HtmlWebpackPlugin({ title: 'Stylable Playground', favicon: './favicon.ico' }),
+    ],
 };

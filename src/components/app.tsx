@@ -1,6 +1,12 @@
 import { createCjsModuleSystem } from '@file-services/commonjs';
 import { createMemoryFs } from '@file-services/memory';
-import { Diagnostic, noCollisionNamespace, Stylable, StylableMeta } from '@stylable/core';
+import {
+    Diagnostic,
+    noCollisionNamespace,
+    Stylable,
+    StylableExports,
+    StylableMeta,
+} from '@stylable/core';
 import Editor, { ControlledEditor } from '@monaco-editor/react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { JSONCrush, JSONUncrush } from '../json-crush';
@@ -35,6 +41,7 @@ export class AppModel {
     files: Record<string, string> = {};
     selected = '';
     meta?: StylableMeta;
+    jsExports?: StylableExports;
     diagnostics: Omit<Diagnostic, 'node' | 'options'>[] = [];
     onChange? = (): void => undefined;
     private _onChangeId?: number = undefined;
@@ -93,16 +100,23 @@ export class AppModel {
         this.selected = filePath;
         if (this.selected.endsWith('.st.css')) {
             try {
-                this.meta = this.stylable.transform(this.files[this.selected], this.selected).meta;
+                const { exports, meta } = this.stylable.transform(
+                    this.files[this.selected],
+                    this.selected
+                );
+                this.meta = meta;
+                this.jsExports = exports;
                 this.diagnostics = this.meta.diagnostics.reports.concat(
                     this.meta.transformDiagnostics?.reports || []
                 );
             } catch (e) {
                 this.meta = undefined;
+                this.jsExports = undefined;
                 this.diagnostics = [{ type: 'error', message: String(e) }];
             }
         } else {
             this.meta = undefined;
+            this.jsExports = undefined;
             this.diagnostics = [];
         }
         this._onChange();
@@ -115,7 +129,16 @@ export class AppModel {
 }
 
 export const App: React.FC<AppProps> = ({ className, model }) => {
-    const { files, selected, setSelected, addFile, removeFile, updateSelected, meta } = model;
+    const {
+        files,
+        selected,
+        setSelected,
+        addFile,
+        removeFile,
+        updateSelected,
+        meta,
+        jsExports,
+    } = model;
     const forceUpdate = useForceUpdate();
 
     useEffect(() => {
@@ -153,7 +176,7 @@ export const App: React.FC<AppProps> = ({ className, model }) => {
                     <h2 className={classes.editorTitle}>Target:</h2>
                     <div>
                         <Editor
-                            value={meta?.outputAst?.toString() ?? ''}
+                            value={formatOutput(meta, jsExports)}
                             language="css"
                             options={{
                                 readOnly: true,
@@ -195,6 +218,14 @@ export const App: React.FC<AppProps> = ({ className, model }) => {
         </main>
     );
 };
+
+function formatOutput(meta?: StylableMeta, exports?: StylableExports) {
+    const css = meta?.outputAst?.toString() ?? '';
+    if (exports && Object.keys(exports).length) {
+        return String(css) + `\n/*\nJavascript Exports:\n${JSON.stringify(exports, null, 4)}\n*/`;
+    }
+    return css;
+}
 
 function cleanMeta(meta?: StylableMeta) {
     const { ast, outputAst, rawAst, parent, ...cleanMeta } = meta || {};
