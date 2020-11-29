@@ -22,14 +22,16 @@
     "@file-services/commonjs": "^4.2.0",
     "@file-services/memory": "^4.1.2",
     "@monaco-editor/react": "^3.6.3",
-    "@stylable/core": "^3.11.2",
-    "@stylable/runtime": "^3.11.2",
+    "@stylable/core": "^3.11.8",
+    "@stylable/language-service": "^3.11.8",
+    "@stylable/runtime": "^3.11.8",
+    "monaco-editor": "^0.21.2",
     "react": "^16.13.1",
     "react-dom": "^16.13.1"
   },
   "devDependencies": {
     "@file-services/types": "^4.1.0",
-    "@stylable/webpack-plugin": "^3.11.2",
+    "@stylable/webpack-plugin": "^3.11.8",
     "@types/react": "^16.9.51",
     "@types/react-dom": "^16.9.8",
     "@typescript-eslint/eslint-plugin": "^4.4.0",
@@ -46,6 +48,7 @@
     "serve": "^11.3.2",
     "ts-loader": "^8.0.4",
     "typescript": "^4.0.3",
+    "vscode-languageserver-types": "^3.15.1",
     "webpack": "^4.44.2",
     "webpack-cli": "^3.3.12",
     "webpack-dev-server": "^3.11.0"

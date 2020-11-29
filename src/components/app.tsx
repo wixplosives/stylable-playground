@@ -7,8 +7,10 @@ import {
     StylableExports,
     StylableMeta,
 } from '@stylable/core';
-import Editor, { ControlledEditor } from '@monaco-editor/react';
+import { StylableLanguageService } from '@stylable/language-service';
+import Editor, { ControlledEditor, Monaco, monaco } from '@monaco-editor/react';
 import React, { useCallback, useEffect, useState } from 'react';
+import type { TextEdit } from 'vscode-languageserver-types';
 import { JSONCrush, JSONUncrush } from '../json-crush';
 import { FileExplorer } from './file-explorer/file-explorer';
 import { Header } from './header';
@@ -38,12 +40,14 @@ export class AppModel {
         },
         resolveNamespace: noCollisionNamespace(),
     });
+    lsp = new StylableLanguageService({ fs: this.fs, stylable: this.stylable });
     files: Record<string, string> = {};
     selected = '';
     meta?: StylableMeta;
     jsExports?: StylableExports;
     diagnostics: Omit<Diagnostic, 'node' | 'options'>[] = [];
     onChange? = (): void => undefined;
+    monacoUp = false;
     private _onChangeId?: number = undefined;
     constructor() {
         const searchParams = new URLSearchParams(document.location.hash.slice(1));
@@ -54,6 +58,37 @@ export class AppModel {
         this.fs.populateDirectorySync('/', files);
         this.files = files;
         this.setSelected(selected || Object.keys(files)[0]);
+
+        monaco
+            .init()
+            .then((monacoInstance: Monaco) => {
+                monacoInstance.languages.register({ id: 'stylable' });
+                monacoInstance.languages.registerCompletionItemProvider('stylable', {
+                    provideCompletionItems: (model, position, _context, _token) => {
+                        return {
+                            suggestions: this.lsp
+                                .onCompletion(this.selected, model.getOffsetAt(position))
+                                .map((comp) => {
+                                    const { newText, range } = comp.textEdit as TextEdit;
+                                    return {
+                                        label: comp.label,
+                                        kind: comp.kind || 1,
+                                        insertText: newText || '',
+                                        range: {
+                                            startLineNumber: range.start.line,
+                                            startColumn: range.start.character,
+                                            endLineNumber: range.end.line,
+                                            endColumn: range.end.character,
+                                        },
+                                    };
+                                }),
+                        };
+                    },
+                });
+            })
+            .then(() => (this.monacoUp = true))
+            // eslint-disable-next-line no-console
+            .catch((e) => console.log(e));
     }
     private _onChange = (): void => {
         if (this._onChangeId === undefined) {
@@ -163,13 +198,18 @@ export const App: React.FC<AppProps> = ({ className, model }) => {
                 <div className={classes.source}>
                     <h2 className={classes.editorTitle}>Source:</h2>
                     <div>
-                        <ControlledEditor
-                            value={files[selected]}
-                            onChange={(_, value) => updateSelected(value)}
-                            language={selected.endsWith('.st.css') ? 'css' : 'javascript'}
-                            options={{ minimap: { enabled: false }, scrollBeyondLastLine: false }}
-                            editorDidMount={resizeEditor}
-                        />
+                        {model.monacoUp && (
+                            <ControlledEditor
+                                value={files[selected]}
+                                onChange={(_, value) => updateSelected(value)}
+                                language={selected.endsWith('.st.css') ? 'stylable' : 'javascript'}
+                                options={{
+                                    minimap: { enabled: false },
+                                    scrollBeyondLastLine: false,
+                                }}
+                                editorDidMount={resizeEditor}
+                            />
+                        )}
                     </div>
                 </div>
                 <div className={classes.target}>
