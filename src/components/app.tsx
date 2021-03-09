@@ -7,7 +7,7 @@ import {
     StylableExports,
     StylableMeta,
 } from '@stylable/core';
-import Editor, { ControlledEditor } from '@monaco-editor/react';
+import Editor from '@monaco-editor/react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { JSONCrush, JSONUncrush } from '../json-crush';
 import { FileExplorer } from './file-explorer/file-explorer';
@@ -163,12 +163,12 @@ export const App: React.FC<AppProps> = ({ className, model }) => {
                 <div className={classes.source}>
                     <h2 className={classes.editorTitle}>Source:</h2>
                     <div>
-                        <ControlledEditor
+                        <Editor
                             value={files[selected]}
                             onChange={(_, value) => updateSelected(value)}
                             language={selected.endsWith('.st.css') ? 'css' : 'javascript'}
                             options={{ minimap: { enabled: false }, scrollBeyondLastLine: false }}
-                            editorDidMount={resizeEditor}
+                            onMount={resizeEditor}
                         />
                     </div>
                 </div>
@@ -183,7 +183,7 @@ export const App: React.FC<AppProps> = ({ className, model }) => {
                                 minimap: { enabled: false },
                                 scrollBeyondLastLine: false,
                             }}
-                            editorDidMount={resizeEditor}
+                            onMount={resizeEditor}
                         />
                     </div>
                 </div>
@@ -198,7 +198,7 @@ export const App: React.FC<AppProps> = ({ className, model }) => {
                                 minimap: { enabled: false },
                                 scrollBeyondLastLine: false,
                             }}
-                            editorDidMount={resizeEditor}
+                            onMount={resizeEditor}
                         />
                     </div>
                 </div>

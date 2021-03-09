@@ -21,7 +21,14 @@ module.exports = {
         ],
     },
     resolve: {
-        extensions: ['.ts', '.tsx', '.mjs', '.js', '.json'],
+        extensions: ['.ts', '.tsx', '.js', '.json'],
+        alias: {
+            process: require.resolve('process/browser')
+        },
+        fallback: {
+            os: false,
+            path: require.resolve('@file-services/path')
+        }
     },
     plugins: [
         new StylableWebpackPlugin({
