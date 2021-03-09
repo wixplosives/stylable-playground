@@ -164,7 +164,7 @@ export const App: React.FC<AppProps> = ({ className, model }) => {
                     <h2 className={classes.editorTitle}>Source:</h2>
                     <div>
                         <Editor
-                            defaultValue={files[selected]}
+                            value={files[selected]}
                             onChange={(value) => updateSelected(value)}
                             language={selected.endsWith('.st.css') ? 'css' : 'javascript'}
                             options={{ minimap: { enabled: false }, scrollBeyondLastLine: false }}
