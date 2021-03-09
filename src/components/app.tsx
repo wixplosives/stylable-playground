@@ -165,7 +165,7 @@ export const App: React.FC<AppProps> = ({ className, model }) => {
                     <div>
                         <Editor
                             defaultValue={files[selected]}
-                            onChange={(_, value) => updateSelected(value)}
+                            onChange={(value) => updateSelected(value)}
                             language={selected.endsWith('.st.css') ? 'css' : 'javascript'}
                             options={{ minimap: { enabled: false }, scrollBeyondLastLine: false }}
                             onMount={resizeEditor}
