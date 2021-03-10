@@ -7,12 +7,15 @@ import {
     StylableExports,
     StylableMeta,
 } from '@stylable/core';
-import Editor from '@monaco-editor/react';
+import { StylableLanguageService } from '@stylable/language-service';
+import { editor, languages } from 'monaco-editor';
 import React, { useCallback, useEffect, useState } from 'react';
+import type { TextEdit } from 'vscode-languageserver-types';
 import { JSONCrush, JSONUncrush } from '../json-crush';
 import { FileExplorer } from './file-explorer/file-explorer';
 import { Header } from './header';
 import { st, classes } from './app.st.css';
+import { Editor } from './editor';
 
 const DEFAULT_EXT = '.st.css';
 
@@ -38,6 +41,7 @@ export class AppModel {
         },
         resolveNamespace: noCollisionNamespace(),
     });
+    lsp = new StylableLanguageService({ fs: this.fs, stylable: this.stylable });
     files: Record<string, string> = {};
     selected = '';
     meta?: StylableMeta;
@@ -52,8 +56,33 @@ export class AppModel {
             ? (JSON.parse(JSONUncrush(decodeURIComponent(state))) as URLState)
             : createSampleData();
         this.fs.populateDirectorySync('/', files);
+
         this.files = files;
         this.setSelected(selected || Object.keys(files)[0]);
+
+        languages.register({ id: 'stylable' });
+        languages.registerCompletionItemProvider('stylable', {
+            provideCompletionItems: (model, position, _context, _token) => {
+                return {
+                    suggestions: this.lsp
+                        .onCompletion(this.selected, model.getOffsetAt(position))
+                        .map((comp) => {
+                            const { newText, range } = comp.textEdit as TextEdit;
+                            return {
+                                label: comp.label,
+                                kind: comp.kind || 1,
+                                insertText: newText || '',
+                                range: {
+                                    startLineNumber: range.start.line,
+                                    startColumn: range.start.character,
+                                    endLineNumber: range.end.line,
+                                    endColumn: range.end.character,
+                                },
+                            };
+                        }),
+                };
+            },
+        });
     }
     private _onChange = (): void => {
         if (this._onChangeId === undefined) {
@@ -128,6 +157,13 @@ export class AppModel {
     };
 }
 
+const editorOptions: editor.IStandaloneEditorConstructionOptions = {
+    fixedOverflowWidgets: true,
+    minimap: { enabled: false },
+    scrollBeyondLastLine: false,
+    wordWrap: 'on',
+};
+
 export const App: React.FC<AppProps> = ({ className, model }) => {
     const {
         files,
@@ -135,7 +171,7 @@ export const App: React.FC<AppProps> = ({ className, model }) => {
         setSelected,
         addFile,
         removeFile,
-        updateSelected,
+        // updateSelected,
         meta,
         jsExports,
     } = model;
@@ -164,11 +200,12 @@ export const App: React.FC<AppProps> = ({ className, model }) => {
                     <h2 className={classes.editorTitle}>Source:</h2>
                     <div>
                         <Editor
+                            {...editorOptions}
+                            language={selected.endsWith('.st.css') ? 'stylable' : 'javascript'}
                             value={files[selected]}
-                            onChange={(value) => updateSelected(value)}
-                            language={selected.endsWith('.st.css') ? 'css' : 'javascript'}
-                            options={{ minimap: { enabled: false }, scrollBeyondLastLine: false }}
-                            onMount={resizeEditor}
+                            // filePath={selected}
+                            // onChange={(value) => updateSelected(value)}
+                            // onMount={resizeEditor}
                         />
                     </div>
                 </div>
@@ -176,14 +213,12 @@ export const App: React.FC<AppProps> = ({ className, model }) => {
                     <h2 className={classes.editorTitle}>Target:</h2>
                     <div>
                         <Editor
-                            value={formatOutput(meta, jsExports)}
+                            readOnly
+                            {...editorOptions}
                             language="css"
-                            options={{
-                                readOnly: true,
-                                minimap: { enabled: false },
-                                scrollBeyondLastLine: false,
-                            }}
-                            onMount={resizeEditor}
+                            value={formatOutput(meta, jsExports)}
+                            // filePath={selected}
+                            // onMount={resizeEditor}
                         />
                     </div>
                 </div>
@@ -191,14 +226,12 @@ export const App: React.FC<AppProps> = ({ className, model }) => {
                     <h2 className={classes.editorTitle}>Meta & AST:</h2>
                     <div>
                         <Editor
-                            value={JSON.stringify(cleanMeta(meta), null, 2)}
+                            readOnly
+                            {...editorOptions}
                             language="json"
-                            options={{
-                                readOnly: true,
-                                minimap: { enabled: false },
-                                scrollBeyondLastLine: false,
-                            }}
-                            onMount={resizeEditor}
+                            value={JSON.stringify(cleanMeta(meta), null, 2)}
+                            // filePath={selected}
+                            // onMount={resizeEditor}
                         />
                     </div>
                 </div>
@@ -232,21 +265,21 @@ function cleanMeta(meta?: StylableMeta) {
     return cleanMeta;
 }
 
-function resizeEditor(_: unknown, editor: { getContainerDomNode(): HTMLElement; layout(): void }) {
-    // work around monaco resize by setting the container overflow to hidden then calc content size and reset the overflow
-    // this function relies in the structure of the editor container
-    const resize = () => {
-        try {
-            const el = editor.getContainerDomNode().parentElement?.parentElement as HTMLElement;
-            el.style.setProperty('overflow', 'hidden');
-            editor.layout();
-            el.style.setProperty('overflow', null);
-        } catch {
-            window.removeEventListener('resize', resize);
-        }
-    };
-    window.addEventListener('resize', resize);
-}
+// const resizeEditor = (editor) => {
+//     // work around monaco resize by setting the container overflow to hidden then calc content size and reset the overflow
+//     // this function relies in the structure of the editor container
+//     const resize = () => {
+//         try {
+//             const el = editor.getContainerDomNode().parentElement?.parentElement as HTMLElement;
+//             el.style.setProperty('overflow', 'hidden');
+//             editor.layout();
+//             el.style.setProperty('overflow', null);
+//         } catch {
+//             window.removeEventListener('resize', resize);
+//         }
+//     };
+//     window.addEventListener('resize', resize);
+// };
 
 function createSampleData() {
     const file1 = '/index.st.css';

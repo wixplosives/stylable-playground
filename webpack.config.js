@@ -13,22 +13,31 @@ module.exports = {
             {
                 test: /\.tsx?$/,
                 loader: 'ts-loader',
+                options: {
+                    transpileOnly: true,
+                },
             },
             {
-                test: /\.(png|jpg|jpeg|gif|svg)$/,
-                loader: 'file-loader',
+                test: /\.css?/,
+                exclude: /\.st\.css?/,
+                use: ['style-loader', 'css-loader'],
+            },
+            {
+                test: /\.(png|jpg|jpeg|gif|svg|ttf)/,
+                type: 'asset/resource',
             },
         ],
+        noParse: [require.resolve('typescript/lib/typescript.js')],
     },
     resolve: {
         extensions: ['.ts', '.tsx', '.js', '.json'],
         alias: {
-            process: require.resolve('process/browser')
+            process: require.resolve('process/browser'),
         },
         fallback: {
             os: false,
-            path: require.resolve('@file-services/path')
-        }
+            path: require.resolve('@file-services/path'),
+        },
     },
     plugins: [
         new StylableWebpackPlugin({
@@ -36,4 +45,7 @@ module.exports = {
         }),
         new HtmlWebpackPlugin({ title: 'Stylable Playground', favicon: './favicon.ico' }),
     ],
+    performance: {
+        hints: false,
+    },
 };

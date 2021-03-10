@@ -27,3 +27,7 @@ declare module '*.svg' {
     const urlToFile: string;
     export default urlToFile;
 }
+
+// eslint-disable-next-line no-var
+declare var MonacoEnvironment: import('monaco-editor').Environment;
+
