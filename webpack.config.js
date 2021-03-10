@@ -32,7 +32,7 @@ module.exports = {
     },
     plugins: [
         new StylableWebpackPlugin({
-            filename: '[contenthash].[name].css',
+            filename: 'stylable.[contenthash].css',
         }),
         new HtmlWebpackPlugin({ title: 'Stylable Playground', favicon: './favicon.ico' }),
     ],
