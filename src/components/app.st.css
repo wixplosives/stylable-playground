@@ -4,17 +4,13 @@
 }
 
 :import {
-    -st-from: "./file-explorer/file-explorer.st.css";
+    -st-from: "./file-explorer.st.css";
     -st-default: FileExplorer;
 }
 
-:global(html),
-:global(body) {
-    height: 100%;
-}
-
-#playground {
-    height: 100%;
+:import {
+    -st-from: "./pane.st.css";
+    -st-default: Pane;
 }
 
 :vars {
@@ -32,6 +28,16 @@
     smallText: 1em;
     mediumText: 1.5em;
     largeText: 2em;
+}
+
+
+:global(html),
+:global(body) {
+    height: 100%;
+}
+
+#playground {
+    height: 100%;
 }
 
 .root {
@@ -113,7 +119,8 @@
     overflow: hidden;
 }
 
-.fileExplorer::remove, .fileExplorer::cancelRemove {
+.fileExplorer::remove,
+.fileExplorer::cancelRemove {
     border: 0;
     cursor: pointer;
     background-color: rgba(255, 255, 255, 0);
@@ -128,6 +135,7 @@
 .fileExplorer::fileEntry:selected {
     background-color: value(textActive);
 }
+
 .fileExplorer::fileEntry:markedForDeletion {
     background-color: value(bgWarning);
 }
@@ -157,14 +165,6 @@
     background: #ffffff;
     display: grid;
     grid-template-rows: auto 1fr;
-}
-
-.editorTitle {
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-    margin: 0;
-    padding: 0.5em;
-    font-size: value(mediumText);
-    background: linear-gradient(rgba(0, 0, 0, 0.03), rgba(0, 0, 0, 0.0));
 }
 
 .source {
@@ -223,6 +223,19 @@
     .editor {
         margin-top: value(smallGap);
         height: 400px;
+    }
+
+}
+
+
+@st-scope .root {
+
+    Pane::title {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        margin: 0;
+        padding: 0.5em;
+        font-size: value(mediumText);
+        background: linear-gradient(rgba(0, 0, 0, 0.03), rgba(0, 0, 0, 0.0));
     }
 
 }
