@@ -1,8 +1,6 @@
-.root {
-}
+.root {}
 
-.title {
-}
+.title {}
 
 .fileEntries {}
 
@@ -13,6 +11,7 @@
 .label {}
 
 .remove {}
+
 .cancelRemove {}
 
 .newFileEntry {}
