@@ -76,7 +76,7 @@ export class AppModel {
             'state',
             JSONCrush(JSON.stringify({ files: this.files, selected: this.selected }))
         );
-        document.location.hash = searchParams.toString();
+        history.replaceState(undefined, window.name, '#' + searchParams.toString());
     }
     addFile = (fileName: string): void => {
         const filePath = getFilePathFromUserInput(fileName, this.fs.extname(fileName));
