@@ -8,7 +8,7 @@ import { st, classes } from './app.st.css';
 
 import { resizeEditor } from '../lib/resize-editor';
 import { useForceUpdate } from '../lib/use-force-update';
-import { AppModel } from '../lib/app-model';
+import type { AppModel } from '../lib/app-model';
 
 export interface AppProps {
     className?: string;

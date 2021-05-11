@@ -1,4 +1,4 @@
-import { Diagnostic, StylableMeta } from '@stylable/core';
+import type { Diagnostic, StylableMeta } from '@stylable/core';
 
 export function DiagnosticsList({
     diagnostics,

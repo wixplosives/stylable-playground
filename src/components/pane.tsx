@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 import { st, classes } from './pane.st.css';
 
 export function Pane({

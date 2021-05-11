@@ -1,7 +1,6 @@
-export function resizeEditor(
-    _: unknown,
-    editor: { getContainerDomNode(): HTMLElement; layout(): void }
-): void {
+import type { OnMount } from '@monaco-editor/react';
+
+export const resizeEditor: OnMount = (editor) => {
     // work around monaco resize by setting the container overflow to hidden then calc content size and reset the overflow
     // this function relies in the structure of the editor container
     const resize = () => {
@@ -15,4 +14,4 @@ export function resizeEditor(
         }
     };
     window.addEventListener('resize', resize);
-}
+};
