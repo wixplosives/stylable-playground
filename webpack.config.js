@@ -16,17 +16,13 @@ module.exports = {
             },
             {
                 test: /\.(png|jpg|jpeg|gif|svg)$/,
-                loader: 'file-loader',
+                type: 'asset',
             },
         ],
     },
     resolve: {
         extensions: ['.ts', '.tsx', '.js', '.json'],
-        alias: {
-            process: require.resolve('process/browser')
-        },
         fallback: {
-            os: false,
             path: require.resolve('@file-services/path')
         }
     },
