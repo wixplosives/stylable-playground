@@ -6,6 +6,7 @@
 :import {
     -st-from: "./file-explorer.st.css";
     -st-default: FileExplorer;
+    -st-named: label as fileLabel;
 }
 
 :import {
@@ -132,6 +133,11 @@
     padding: 0;
 }
 
+:is(.fileExplorer::fileEntry:hover,
+    .fileExplorer::fileEntry:selected,
+    .fileExplorer::fileEntry:markedForDeletion) > .fileLabel {
+    color: value(dark, 1);
+}
 
 .fileExplorer::fileEntry:hover {
     background-color: value(bgHover);
