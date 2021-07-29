@@ -3,3 +3,9 @@
 .title {}
 
 .icon {}
+
+.buttonContainer {}
+
+.button {
+  -st-states: isCopied;
+}

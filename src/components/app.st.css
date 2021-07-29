@@ -30,7 +30,6 @@
     largeText: 2em;
 }
 
-
 :global(html),
 :global(body) {
     height: 100%;
@@ -53,7 +52,6 @@
     background-color: rgb(45, 45, 45);
 }
 
-
 .editors {
     overflow: hidden;
     display: grid;
@@ -62,13 +60,15 @@
         "ast diagnostics";
     grid-template-columns: 50% 50%;
     grid-template-rows: 50% 50%;
-
 }
 
 .header {
     -st-extends: Header;
+    display: flex;
+    align-items: center;
     grid-area: header;
     background-color: rgb(40, 40, 40);
+    padding: value(smallGap) value(mediumGap);
     box-shadow: 0px 0px 4px 0px black;
     z-index: 1;
 }
@@ -81,7 +81,30 @@
 }
 
 .header::icon {
-    margin: value(smallGap) value(mediumGap);
+    margin-inline-end: value(mediumGap);
+}
+
+.header::buttonContainer {
+    display: flex;
+    margin-left: auto;
+    height: 2em;
+}
+
+.header::button {
+    background-color: value(bgContrast);
+    border: unset;
+    cursor: pointer;
+    height: 100%;
+    width: 6em;
+}
+
+.header::button:hover {
+    background-color: value(bgHover);
+}
+
+
+.header::button:isCopied {
+    background-color: value(textActive);
 }
 
 .fileExplorer {
@@ -194,6 +217,19 @@
         flex-direction: column;
     }
 
+    .header {
+        flex-direction: column;
+        padding: value(smallGap) 0;
+    }
+
+    .header::buttonContainer {
+        margin-left: revert;
+        width: 100%;
+    }
+
+    .header::button {
+        flex: 1;
+    }
 
     .header::title {
         justify-content: center;
@@ -203,7 +239,6 @@
         margin: 0;
         margin-right: value(mediumGap);
     }
-
 
     .fileExplorer {
         margin-bottom: value(smallGap);
@@ -224,12 +259,9 @@
         margin-top: value(smallGap);
         height: 400px;
     }
-
 }
 
-
 @st-scope .root {
-
     Pane::title {
         border-bottom: 1px solid rgba(0, 0, 0, 0.1);
         margin: 0;
@@ -237,5 +269,4 @@
         font-size: value(mediumText);
         background: linear-gradient(rgba(0, 0, 0, 0.03), rgba(0, 0, 0, 0.0));
     }
-
 }
