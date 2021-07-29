@@ -9,6 +9,7 @@ import { st, classes } from './app.st.css';
 import { resizeEditor } from '../lib/resize-editor';
 import { useForceUpdate } from '../lib/use-force-update';
 import type { AppModel } from '../lib/app-model';
+import { useColorTheme } from '../lib/use-color-theme';
 
 export interface AppProps {
     className?: string;
@@ -28,7 +29,9 @@ export const App: React.FC<AppProps> = ({ className, model }) => {
         formattedOutput,
         diagnostics,
     } = model;
+    const { theme, themeClassName } = useColorTheme()
     const forceUpdate = useForceUpdate();
+    const editorTheme = theme === 'dark' ? 'vs-dark' : 'light'
 
     useEffect(() => {
         model.onChange = forceUpdate;
@@ -38,7 +41,7 @@ export const App: React.FC<AppProps> = ({ className, model }) => {
     });
 
     return (
-        <main className={st(classes.root, className)}>
+        <main className={st(classes.root, className, themeClassName)}>
             <Header className={classes.header} />
             <FileExplorer
                 filePaths={Object.keys(files)}
@@ -56,11 +59,13 @@ export const App: React.FC<AppProps> = ({ className, model }) => {
                         language={selected.endsWith('.st.css') ? 'css' : 'javascript'}
                         options={{ minimap: { enabled: false }, scrollBeyondLastLine: false }}
                         onMount={resizeEditor}
+                        theme={editorTheme}
                     />
                 </Pane>
                 <Pane title="Target" className={classes.target}>
                     <Editor
                         value={formattedOutput}
+                        theme={editorTheme}
                         language="css"
                         options={{
                             readOnly: true,
@@ -73,6 +78,7 @@ export const App: React.FC<AppProps> = ({ className, model }) => {
                 <Pane title="Meta" className={classes.ast}>
                     <Editor
                         value={printedMeta}
+                        theme={editorTheme}
                         language="json"
                         options={{
                             readOnly: true,
