@@ -13,6 +13,11 @@
     -st-default: Pane;
 }
 
+:import {
+    -st-from: "./error.st.css";
+    -st-default: Error;
+}
+
 :vars {
     bgMain: rgb(42, 42, 42);
     bgContrast: rgba(255, 255, 255, 0.9);
@@ -30,7 +35,6 @@
     largeText: 2em;
 }
 
-
 :global(html),
 :global(body) {
     height: 100%;
@@ -41,6 +45,7 @@
 }
 
 .root {
+    -st-states: hasError;
     height: 100%;
     display: grid;
     grid-template-columns: 300px 1fr;
@@ -53,6 +58,11 @@
     background-color: rgb(45, 45, 45);
 }
 
+.root:hasError {
+    grid-template-areas:
+        "header header"
+        "error error";
+}
 
 .editors {
     overflow: hidden;
@@ -62,7 +72,6 @@
         "ast diagnostics";
     grid-template-columns: 50% 50%;
     grid-template-rows: 50% 50%;
-
 }
 
 .header {
@@ -187,13 +196,24 @@
     grid-area: diagnostics;
 }
 
+.error {
+    -st-extends: Error;
+    color: #ffffff;
+    text-align: center;
+    grid-area: error;
+}
+
+.error::title {
+    font-size: value(largeText);
+}
+
 @media (max-width: 600px) {
     .root {
         height: auto;
         display: flex;
         flex-direction: column;
+        min-height: 100vh;
     }
-
 
     .header::title {
         justify-content: center;
@@ -203,7 +223,6 @@
         margin: 0;
         margin-right: value(mediumGap);
     }
-
 
     .fileExplorer {
         margin-bottom: value(smallGap);
@@ -224,12 +243,9 @@
         margin-top: value(smallGap);
         height: 400px;
     }
-
 }
 
-
 @st-scope .root {
-
     Pane::title {
         border-bottom: 1px solid rgba(0, 0, 0, 0.1);
         margin: 0;
@@ -237,5 +253,4 @@
         font-size: value(mediumText);
         background: linear-gradient(rgba(0, 0, 0, 0.03), rgba(0, 0, 0, 0.0));
     }
-
 }
