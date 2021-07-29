@@ -9,13 +9,21 @@ export const Error: React.VFC<ErrorProps> = (
   {
     className,
   }
-) => (
-  <div className={st(classes.root, className)}>
-    <h1 className={classes.title}>
-      We can not resolve your URL 😔
-    </h1>
-    <a className={classes.link} href='/'>
-      Start over
-    </a>
-  </div>
-)
+) => {
+
+  const resetHistoryState = () => {
+    history.replaceState(undefined, window.name, '#')
+    window.location.reload()
+  }
+  
+  return (
+    <div className={st(classes.root, className)}>
+      <h1 className={classes.title}>
+        We can not resolve your URL 😔
+      </h1>
+      <a className={classes.link} onClick={resetHistoryState}>
+        Start over
+      </a>
+    </div>
+  )
+}
