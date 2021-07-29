@@ -92,6 +92,7 @@
     -st-extends: FileExplorer;
     padding: 0px value(smallGap);
     font-size: value(smallText);
+    background-color: var(--primary-color);
 }
 
 .fileExplorer::title {
@@ -159,7 +160,7 @@
     padding: 1em 0.5em;
     flex: 1;
     border: none;
-    background-color: var(--primary-color);
+    background-color: var(--primary-second-color);
 }
 
 .fileExplorer::addNewFile {
