@@ -6,6 +6,7 @@
 :import {
     -st-from: "./file-explorer.st.css";
     -st-default: FileExplorer;
+    -st-named: label as fileLabel;
 }
 
 :import {
@@ -19,11 +20,10 @@
 }
 
 :vars {
-    bgMain: rgb(42, 42, 42);
-    bgContrast: rgba(255, 255, 255, 0.9);
+    darkShades: stArray(#252526, #1e1e1e);
+    lightShades: stArray(#ffffff, #f3f3f3);
     bgHover: rgb(150, 255, 146);
     bgWarning: rgb(255, 146, 146);
-    textMain: rgb(34, 34, 34);
     textActive: rgb(255, 217, 0);
     largeGap: 1.5em;
     mediumGap: 0.85em;
@@ -33,6 +33,13 @@
     smallText: 1em;
     mediumText: 1.5em;
     largeText: 2em;
+}
+
+:root {
+    --primary-color: value(lightShades, 0);
+    --primary-second-color: value(lightShades, 1);
+    --secondary-color: value(darkShades, 0);
+    --secondary-second-color: value(darkShades, 1);
 }
 
 :global(html),
@@ -55,13 +62,7 @@
         "fileExplorer editors"
         "fileExplorer editors";
     font-family: monospace;
-    background-color: rgb(45, 45, 45);
-}
-
-.root:hasError {
-    grid-template-areas:
-        "header header"
-        "error error";
+    background-color: var(--primary-second-color);
 }
 
 .editors {
@@ -77,7 +78,7 @@
 .header {
     -st-extends: Header;
     grid-area: header;
-    background-color: rgb(40, 40, 40);
+    background-color: value(darkShades, 0);
     box-shadow: 0px 0px 4px 0px black;
     z-index: 1;
 }
@@ -86,7 +87,7 @@
     display: flex;
     align-items: center;
     font-size: value(largeText);
-    color: value(bgContrast);
+    color: value(lightShades, 1);
 }
 
 .header::icon {
@@ -97,20 +98,21 @@
     -st-extends: FileExplorer;
     padding: 0px value(smallGap);
     font-size: value(smallText);
+    background-color: var(--primary-color);
 }
 
 .fileExplorer::title {
     font-size: value(mediumText);
     padding: 0.5em 0;
     margin: 0;
-    color: #ffffff
+    color: var(--secondary-color)
 }
 
 .fileExplorer::fileEntries {}
 
 .fileExplorer::fileEntry {
     display: flex;
-    background-color: value(bgContrast);
+    background-color: var(--priamry-color);
     margin: value(smallGap) 0;
 }
 
@@ -126,15 +128,22 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
+    color: var(--secondary-color);
 }
 
 .fileExplorer::remove,
 .fileExplorer::cancelRemove {
     border: 0;
     cursor: pointer;
-    background-color: rgba(255, 255, 255, 0);
+    background-color: transparent;
     width: 3em;
     padding: 0;
+}
+
+:is(.fileExplorer::fileEntry:hover,
+    .fileExplorer::fileEntry:selected,
+    .fileExplorer::fileEntry:markedForDeletion) > .fileLabel {
+    color: value(darkShades, 1);
 }
 
 .fileExplorer::fileEntry:hover {
@@ -157,6 +166,7 @@
     padding: 1em 0.5em;
     flex: 1;
     border: none;
+    background-color: var(--primary-second-color);
 }
 
 .fileExplorer::addNewFile {
@@ -246,11 +256,23 @@
 }
 
 @st-scope .root {
+    Pane {
+        color: var(--secondary-color);
+        background: var(--primary-second-color);
+    }
+
     Pane::title {
         border-bottom: 1px solid rgba(0, 0, 0, 0.1);
         margin: 0;
         padding: 0.5em;
         font-size: value(mediumText);
-        background: linear-gradient(rgba(0, 0, 0, 0.03), rgba(0, 0, 0, 0.0));
     }
+}
+
+.darkTheme {
+    -st-extends: root;
+    --primary-color: value(darkShades, 0);
+    --primary-second-color: value(darkShades, 1);
+    --secondary-color: value(lightShades, 0);
+    --secondary-second-color: value(lightShades, 1);
 }
