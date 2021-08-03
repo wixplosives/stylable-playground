@@ -35,24 +35,31 @@ export class AppModel {
     formattedOutput = '';
     jsExports?: StylableExports;
     diagnostics: Omit<Diagnostic, 'node' | 'options'>[] = [];
-    onChange?= (): void => undefined;
+    onChange? = (): void => undefined;
     private _onChangeId?: number = undefined;
     constructor() {
-        try {
-            const searchParams = new URLSearchParams(document.location.hash.slice(1));
-            const state = searchParams.get('state');
-            const { files, selected } = state
-                ? (JSON.parse(JSONUncrush(decodeURIComponent(state))) as URLState)
-                : createSampleData();
-            this.fs.populateDirectorySync('/', files);
-            this.files = files;
-            this.setSelected(selected || Object.keys(files)[0]);
-        } catch (error) {
-            this.error = error as Error;
-            // eslint-disable-next-line no-console
-            console.error(error)
+        const searchParams = new URLSearchParams(document.location.hash.slice(1));
+        const stateParam = searchParams.get('state');
+        let state;
+
+        if (stateParam) {
+            try {
+                state = JSON.parse(JSONUncrush(decodeURIComponent(stateParam))) as URLState;
+            } catch (error) {
+                this.error = error as Error;
+            }
         }
+
+        if (!state) {
+            state = createSampleData();
+        }
+
+        const { files, selected } = state;
+        this.fs.populateDirectorySync('/', files);
+        this.files = files;
+        this.setSelected(selected || Object.keys(files)[0]);
     }
+
     private internalOnChange = (): void => {
         if (this._onChangeId === undefined) {
             this._onChangeId = requestAnimationFrame(() => {
