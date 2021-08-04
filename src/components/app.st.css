@@ -161,6 +161,7 @@
     flex: 1;
     border: none;
     background-color: var(--primary-second-color);
+    color: var(--secondary-color);
 }
 
 .fileExplorer::addNewFile {
