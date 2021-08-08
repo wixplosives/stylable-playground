@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { classes } from '../components/app.st.css';
 
 const mediaDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
-export function useColorTheme() {
+
+export function useColorTheme(): { theme: 'dark' | 'light'; themeClassName: string } {
     const [theme, setTheme] = useState<'dark' | 'light'>(
         mediaDarkScheme.matches ? 'dark' : 'light'
     );
