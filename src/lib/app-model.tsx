@@ -68,7 +68,7 @@ export class AppModel {
         this.formattedMeta = '{}';
         this.formattedOutput = '';
         this.jsExports = undefined;
-        this.diagnostics = e ? [{ type: 'error', message: String(e) }] : [];
+        this.diagnostics = e ? [{ type: 'error', message: e.message || String(e) }] : [];
     }
     updateHash(): void {
         const searchParams = new URLSearchParams();
