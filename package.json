@@ -33,7 +33,7 @@
     "@file-services/path": "^5.3.1",
     "@file-services/types": "^5.3.1",
     "@stylable/webpack-plugin": "^4.5.1",
-    "@types/react": "^17.0.16",
+    "@types/react": "^17.0.18",
     "@types/react-dom": "^17.0.9",
     "@typescript-eslint/eslint-plugin": "^4.29.1",
     "@typescript-eslint/parser": "^4.29.1",
@@ -50,7 +50,7 @@
     "ts-loader": "^9.2.5",
     "typescript": "~4.3.5",
     "webpack": "^5.50.0",
-    "webpack-cli": "^4.7.2",
+    "webpack-cli": "^4.8.0",
     "webpack-dev-server": "^4.0.0-rc.0"
   }
 }
