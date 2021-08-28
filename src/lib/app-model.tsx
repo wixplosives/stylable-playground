@@ -112,7 +112,7 @@ export class AppModel {
                 );
                 this.setResults(meta, exports);
             } catch (e) {
-                this.resetResults(e);
+                this.resetResults(e as Error);
             }
         } else {
             this.resetResults();
