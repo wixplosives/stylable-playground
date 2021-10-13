@@ -15,8 +15,8 @@
 }
 
 :vars {
-    darkShades: stArray(#252526, #1e1e1e);
-    lightShades: stArray(#ffffff, #f3f3f3);
+    darkShades: st-array(#252526, #1e1e1e);
+    lightShades: st-array(#ffffff, #f3f3f3);
     bgHover: rgb(150, 255, 146);
     bgWarning: rgb(255, 146, 146);
     textActive: rgb(255, 217, 0);
