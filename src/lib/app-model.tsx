@@ -1,5 +1,6 @@
 import { createCjsModuleSystem } from '@file-services/commonjs';
 import { createMemoryFs } from '@file-services/memory';
+import * as StylableCore from '@stylable/core';
 import {
     Diagnostic,
     noCollisionNamespace,
@@ -23,6 +24,11 @@ export class AppModel {
         fileSystem: this.fs,
         requireModule: (id) => {
             this.moduleSystem.loadedModules.clear();
+            this.moduleSystem.loadedModules.set('@stylable/core', {
+                filename: '@stylable/core',
+                id: '@stylable/core',
+                exports: StylableCore,
+            });
             return this.moduleSystem.requireModule(id);
         },
         resolveNamespace: noCollisionNamespace(),
