@@ -6,7 +6,7 @@
   "scripts": {
     "clean": "rimraf dist",
     "prebuild": "npm run clean",
-    "build": "webpack --mode production --no-devtool",
+    "build": "webpack --mode production",
     "start": "webpack serve --open",
     "serve": "serve ./dist",
     "pretest": "npm run typecheck && npm run lint",
