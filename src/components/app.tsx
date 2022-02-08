@@ -1,5 +1,5 @@
 import Editor from '@monaco-editor/react';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { FileExplorer } from './file-explorer';
 import { Header } from './header';
 import { Pane } from './pane';
@@ -10,6 +10,7 @@ import { resizeEditor } from '../lib/resize-editor';
 import { useForceUpdate } from '../lib/use-force-update';
 import type { AppModel } from '../lib/app-model';
 import { useColorTheme } from '../lib/use-color-theme';
+import { ErrorView } from './error';
 
 export interface AppProps {
     className?: string;
@@ -28,10 +29,15 @@ export const App: React.FC<AppProps> = ({ className, model }) => {
         formattedMeta: printedMeta,
         formattedOutput,
         diagnostics,
+        error,
     } = model;
-    const { theme, themeClassName } = useColorTheme()
+    const { theme, themeClassName } = useColorTheme();
     const forceUpdate = useForceUpdate();
-    const editorTheme = theme === 'dark' ? 'vs-dark' : 'light'
+    const editorTheme = theme === 'dark' ? 'vs-dark' : 'light';
+    const closeError = useCallback(() => {
+        model.error = undefined;
+        forceUpdate();
+    }, [forceUpdate, model]);
 
     useEffect(() => {
         model.onChange = forceUpdate;
@@ -43,6 +49,7 @@ export const App: React.FC<AppProps> = ({ className, model }) => {
     return (
         <main className={st(classes.root, className, themeClassName)}>
             <Header className={classes.header} />
+            {error && <ErrorView className={classes.error} onCloseError={closeError} />}
             <FileExplorer
                 filePaths={Object.keys(files)}
                 onSelect={setSelected}

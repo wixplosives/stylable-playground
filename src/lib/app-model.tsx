@@ -18,6 +18,7 @@ interface URLState {
 
 export class AppModel {
     fs = createMemoryFs();
+    error?: Error;
     moduleSystem = createCjsModuleSystem({ fs: this.fs });
     stylable = Stylable.create({
         projectRoot: '/',
@@ -44,14 +45,27 @@ export class AppModel {
     private _onChangeId?: number = undefined;
     constructor() {
         const searchParams = new URLSearchParams(document.location.hash.slice(1));
-        const state = searchParams.get('state');
-        const { files, selected } = state
-            ? (JSON.parse(JSONUncrush(decodeURIComponent(state))) as URLState)
-            : createSampleData();
+        const stateParam = searchParams.get('state');
+        let state;
+
+        if (stateParam) {
+            try {
+                state = JSON.parse(JSONUncrush(decodeURIComponent(stateParam))) as URLState;
+            } catch (error) {
+                this.error = error as Error;
+            }
+        }
+
+        if (!state) {
+            state = createSampleData();
+        }
+
+        const { files, selected } = state;
         this.fs.populateDirectorySync('/', files);
         this.files = files;
         this.setSelected(selected || Object.keys(files)[0]);
     }
+
     private internalOnChange = (): void => {
         if (this._onChangeId === undefined) {
             this._onChangeId = requestAnimationFrame(() => {
