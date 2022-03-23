@@ -139,7 +139,7 @@ function formatOutput(meta?: StylableMeta, exports?: StylableExports) {
     return css;
 }
 function formatMeta(meta: StylableMeta): string {
-    const { ast, outputAst, rawAst, parent, ...cleanMeta } = meta;
+    const { ast, outputAst, rawAst, ...cleanMeta } = meta;
     return JSON.stringify(cleanMeta, null, 2);
 }
 function getFilePathFromUserInput(fileName: string, ext: string, defaultExt = '.st.css') {
