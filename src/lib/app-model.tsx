@@ -23,11 +23,12 @@ export class AppModel {
         projectRoot: '/',
         fileSystem: this.fs,
         requireModule: (id) => {
-            this.moduleSystem.loadedModules.clear();
-            this.moduleSystem.loadedModules.set('@stylable/core', {
+            this.moduleSystem.requireCache.clear();
+            this.moduleSystem.requireCache.set('@stylable/core', {
                 filename: '@stylable/core',
                 id: '@stylable/core',
                 exports: StylableCore,
+                children: [],
             });
             return this.moduleSystem.requireModule(id);
         },
@@ -94,7 +95,7 @@ export class AppModel {
     };
     removeFile = (filePath: string): void => {
         delete this.files[filePath];
-        this.fs.removeSync(filePath);
+        this.fs.rmSync(filePath);
         if (!this.files[this.selected]) {
             const names = Object.keys(this.files);
             if (names.length === 0) {
